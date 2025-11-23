@@ -1,0 +1,15 @@
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\bin\Debug\net8.0\SchoolPayListSystem.Data.deps.json
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\bin\Debug\net8.0\SchoolPayListSystem.Data.dll
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\bin\Debug\net8.0\SchoolPayListSystem.Data.pdb
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\bin\Debug\net8.0\SchoolPayListSystem.Core.dll
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\bin\Debug\net8.0\SchoolPayListSystem.Core.pdb
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\SchoolPayListSystem.Data.csproj.AssemblyReference.cache
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\SchoolPayListSystem.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\SchoolPayListSystem.Data.AssemblyInfoInputs.cache
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\SchoolPayListSystem.Data.AssemblyInfo.cs
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\SchoolPayListSystem.Data.csproj.CoreCompileInputs.cache
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\SchoolPa.1DB4028E.Up2Date
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\SchoolPayListSystem.Data.dll
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\refint\SchoolPayListSystem.Data.dll
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\SchoolPayListSystem.Data.pdb
+C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Data\obj\Debug\net8.0\ref\SchoolPayListSystem.Data.dll

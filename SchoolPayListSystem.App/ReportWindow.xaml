@@ -1,0 +1,75 @@
+<Window x:Class="SchoolPayListSystem.App.ReportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Reports - View Pay List Data" Height="600" Width="900"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <DockPanel>
+            <!-- Header -->
+            <Grid DockPanel.Dock="Top" Height="60" Background="#9933CC">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="15,0,0,0">
+                    <!-- Logo -->
+                    <Canvas Width="50" Height="50" Background="Transparent" Margin="0,0,15,0">
+                        <Ellipse Canvas.Left="2" Canvas.Top="2" Width="46" Height="46" Fill="White" Opacity="0.2"/>
+                    <Ellipse Canvas.Left="5" Canvas.Top="5" Width="40" Height="40" Fill="White" Opacity="0.9"/>
+                    <!-- Hand with Card Icon -->
+                    <Rectangle Canvas.Left="12" Canvas.Top="10" Width="10" Height="8" 
+                               Fill="#9933CC" Stroke="#9933CC" StrokeThickness="0.5" RadiusX="1" RadiusY="1"/>
+                    <Path Data="M 8 20 Q 6 14 8 8 L 10 8 Q 12 6 14 8 L 14 22 Q 14 27 10 28 Q 8 28 7 26 L 8 20" 
+                          Fill="#9933CC" Opacity="0.9"/>
+                    <TextBlock Canvas.Left="20" Canvas.Top="16" FontSize="8" FontWeight="Bold" Foreground="#9933CC" Text="📊"/>
+                    </Canvas>
+                    <TextBlock Text="Reports: Branch-wise, School-wise, Date-wise Pay Lists" Foreground="White" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Filter Section -->
+            <StackPanel DockPanel.Dock="Top" Margin="20" Background="#F9F9F9">
+                <StackPanel Orientation="Horizontal" Margin="15,15,15,10">
+                    <TextBlock Text="Report Type" Width="120" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <ComboBox x:Name="ReportTypeCombo" Width="200" Padding="10">
+                        <ComboBoxItem Content="Branch-wise" Tag="Branch"/>
+                        <ComboBoxItem Content="School-wise" Tag="School"/>
+                        <ComboBoxItem Content="Date-wise" Tag="Date"/>
+                    </ComboBox>
+                    <TextBlock x:Name="FilterLabel" Text="Filter By Branch" Width="120" VerticalAlignment="Center" FontWeight="Bold" Margin="30,0,0,0"/>
+                    <ComboBox x:Name="FilterCombo" Width="200" Padding="10" Margin="10,0,0,0"/>
+                    <Button Content="Generate Report" Width="120" Height="40" Background="#00AA00" Foreground="White" Click="GenerateReport_Click" Margin="20,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                    <TextBlock Text="From Date" Width="80" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <DatePicker x:Name="FromDatePicker" Width="150" Margin="10,0,0,0"/>
+                    <TextBlock Text="To Date" Width="80" VerticalAlignment="Center" FontWeight="Bold" Margin="30,0,0,0"/>
+                    <DatePicker x:Name="ToDatePicker" Width="150" Margin="10,0,0,0"/>
+                    <Button Content="Print" Width="100" Height="40" Background="#0066CC" Foreground="White" Click="Print_Click" Margin="20,0,0,0"/>
+                    <Button Content="Export PDF" Width="100" Height="40" Background="#FF6600" Foreground="White" Click="ExportPDF_Click" Margin="10,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Report Data Grid -->
+            <DataGrid x:Name="ReportDataGrid" DockPanel.Dock="Top" AutoGenerateColumns="False" Margin="20,10,20,20">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Branch/School" Binding="{Binding BranchName}" Width="150" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Entry Date" Binding="{Binding EntryDate, StringFormat=dd/MM/yyyy}" Width="100" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Amount 1" Binding="{Binding Amount1}" Width="100" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Amount 2" Binding="{Binding Amount2}" Width="100" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Amount 3" Binding="{Binding Amount3}" Width="100" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Total" Binding="{Binding Total}" Width="120" IsReadOnly="True" Foreground="#00AA00" FontWeight="Bold"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Summary Section -->
+            <StackPanel DockPanel.Dock="Bottom" Margin="20" Background="#F0F0F0">
+                <Grid Height="30" Margin="15">
+                    <TextBlock Text="Total Records" Width="150" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <TextBlock Text="0" x:Name="TotalRecordsText" Margin="160,0,0,0" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Height="30" Margin="15,10,15,15">
+                    <TextBlock Text="Total Amount" Width="150" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <TextBlock Text="₹0.00" x:Name="TotalAmountText" Margin="160,0,0,0" VerticalAlignment="Center" Foreground="#00AA00" FontWeight="Bold" FontSize="14"/>
+                </Grid>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>

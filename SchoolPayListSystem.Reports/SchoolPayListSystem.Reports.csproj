@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SchoolPayListSystem.Reports</RootNamespace>
+    <AssemblyName>SchoolPayListSystem.Reports</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SchoolPayListSystem.Core\SchoolPayListSystem.Core.csproj" />
+  </ItemGroup>
+
+</Project>

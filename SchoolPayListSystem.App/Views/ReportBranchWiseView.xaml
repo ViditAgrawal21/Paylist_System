@@ -1,0 +1,1 @@
+﻿<Window x:Class="SchoolPayListSystem.App.Views.ReportBranchWiseView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="ReportBranchWiseView" Height="500" Width="600"><Grid><TextBlock Text="ReportBranchWiseView" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18"/></Grid></Window>

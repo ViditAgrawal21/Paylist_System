@@ -1,0 +1,22 @@
+{
+  "FormattingOptions": {
+    "OrganizeImports": true,
+    "NewLine": "\n"
+  },
+  "RoslynExtensionsOptions": {
+    "EnableAnalyzersSupport": true,
+    "LocationPaths": []
+  },
+  "Sdk": {
+    "IncludePrereleases": false,
+    "Version": ""
+  },
+  "AnalyzeOpenDocumentsOnly": false,
+  "EnableEditorConfigSupport": true,
+  "EnableRoslynAnalyzers": true,
+  "ImplementTypeTarget": "complexType",
+  "MSBuild": {
+    "ProjectLoadTimeout": 10000,
+    "UseLegacyPowerShell": false
+  }
+}

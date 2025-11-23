@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>SchoolPayListSystem.App</RootNamespace>
+    <AssemblyName>SchoolPayListSystem.App</AssemblyName>
+    <ApplicationIcon>Assets/software_logo.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SchoolPayListSystem.Core\SchoolPayListSystem.Core.csproj" />
+    <ProjectReference Include="..\SchoolPayListSystem.Data\SchoolPayListSystem.Data.csproj" />
+    <ProjectReference Include="..\SchoolPayListSystem.Services\SchoolPayListSystem.Services.csproj" />
+    <ProjectReference Include="..\SchoolPayListSystem.Reports\SchoolPayListSystem.Reports.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

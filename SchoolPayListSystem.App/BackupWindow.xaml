@@ -1,0 +1,58 @@
+<Window x:Class="SchoolPayListSystem.App.BackupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Backup and Restore" Height="400" Width="600"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <DockPanel>
+            <!-- Header -->
+            <Grid DockPanel.Dock="Top" Height="50" Background="#00AA00">
+                <TextBlock Text="Database Backup and Restore" Foreground="White" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="20,0,0,0"/>
+            </Grid>
+
+            <!-- Content -->
+            <StackPanel DockPanel.Dock="Top" Margin="40,40,40,0" VerticalAlignment="Top">
+                <!-- Backup Section -->
+                <Border BorderBrush="#CCCCCC" BorderThickness="1" Margin="0,0,0,20">
+                    <StackPanel Margin="20">
+                        <TextBlock Text="Database Backup" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <TextBlock Text="Create a backup copy of the complete database." Foreground="#666666" Margin="0,0,0,15"/>
+                        
+                        <Grid Height="35" Margin="0,0,0,10">
+                            <TextBlock Text="Backup Location" Width="150" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="BackupPathTextBox" Margin="160,0,80,0" Padding="10" IsReadOnly="True" Background="#F5F5F5"/>
+                            <Button Content="Browse" Width="70" Height="35" Background="#0066CC" Foreground="White" HorizontalAlignment="Right" Click="BrowseBackup_Click"/>
+                        </Grid>
+
+                        <Button Content="Create Backup Now" Width="150" Height="40" Background="#00AA00" Foreground="White" Click="CreateBackup_Click"/>
+                        
+                        <TextBlock x:Name="BackupStatus" Text="" Margin="0,10,0,0" Foreground="#00AA00" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Restore Section -->
+                <Border BorderBrush="#CCCCCC" BorderThickness="1" Margin="0,0,0,20">
+                    <StackPanel Margin="20">
+                        <TextBlock Text="Database Restore" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                        <TextBlock Text="Restore database from a previous backup file." Foreground="#666666" Margin="0,0,0,15"/>
+                        
+                        <Grid Height="35" Margin="0,0,0,10">
+                            <TextBlock Text="Restore File" Width="150" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBox x:Name="RestorePathTextBox" Margin="160,0,80,0" Padding="10" IsReadOnly="True" Background="#F5F5F5"/>
+                            <Button Content="Browse" Width="70" Height="35" Background="#0066CC" Foreground="White" HorizontalAlignment="Right" Click="BrowseRestore_Click"/>
+                        </Grid>
+
+                        <Button Content="Restore from Backup" Width="150" Height="40" Background="#FF6600" Foreground="White" Click="RestoreBackup_Click"/>
+                        
+                        <TextBlock x:Name="RestoreStatus" Text="" Margin="0,10,0,0" Foreground="#FF6600" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Close Button -->
+            <StackPanel DockPanel.Dock="Bottom" Margin="40,0,40,30" HorizontalAlignment="Right">
+                <Button Content="Close" Width="100" Height="40" Background="#999999" Foreground="White" Click="Close_Click"/>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>

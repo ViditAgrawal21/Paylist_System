@@ -1,0 +1,102 @@
+<Window x:Class="SchoolPayListSystem.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="School Pay List Generation System" Height="800" Width="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+    <DockPanel LastChildFill="True">
+        <!-- Header -->
+        <Grid DockPanel.Dock="Top" Height="80" Background="#003D7A">
+            <StackPanel VerticalAlignment="Center" Margin="30,0,30,0">
+                <TextBlock Text="School Pay List Generation System" 
+                           Foreground="White" 
+                           FontSize="24" 
+                           FontWeight="Bold"
+                           Margin="0,0,0,3"/>
+                <TextBlock Text="Comprehensive Salary Management Solution" 
+                           Foreground="#B0D4FF" 
+                           FontSize="12"
+                           Margin="0,0,0,0"/>
+            </StackPanel>
+        </Grid>
+
+        <!-- Main Content -->
+        <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="25" Orientation="Vertical">
+                <!-- Master Entry Section -->
+                <Border BorderThickness="1" BorderBrush="#DDDDDD" Background="White" Padding="25" Margin="0,0,0,20" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="MASTER ENTRY" FontSize="14" FontWeight="Bold" Foreground="#003D7A" Margin="0,0,0,20"/>
+                        <TextBlock Text="Configure essential master data for the system" FontSize="11" Foreground="#666666" Margin="0,0,0,15"/>
+                        <WrapPanel>
+                            <Button Content="Add Branch" Height="55" Width="170" Margin="0,0,15,15" Click="AddBranch_Click" FontSize="12" FontWeight="Bold" Background="#0066CC" Foreground="White" Cursor="Hand" Padding="10"/>
+                            <Button Content="Add School Type" Height="55" Width="170" Margin="0,0,15,15" Click="AddSchoolType_Click" FontSize="12" FontWeight="Bold" Background="#0066CC" Foreground="White" Cursor="Hand" Padding="10"/>
+                            <Button Content="Add School" Height="55" Width="170" Margin="0,0,0,15" Click="AddSchool_Click" FontSize="12" FontWeight="Bold" Background="#0066CC" Foreground="White" Cursor="Hand" Padding="10"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Pay List Entry Section -->
+                <Border BorderThickness="1" BorderBrush="#DDDDDD" Background="White" Padding="25" Margin="0,0,0,20" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="PAY LIST ENTRY" FontSize="14" FontWeight="Bold" Foreground="#FF9900" Margin="0,0,0,20"/>
+                        <TextBlock Text="Enter and manage employee salary information" FontSize="11" Foreground="#666666" Margin="0,0,0,15"/>
+                        <Button Content="Monthly Salary Entry" Height="55" Width="200" Click="SalaryEntry_Click" FontSize="12" FontWeight="Bold" Background="#FF9900" Foreground="White" HorizontalAlignment="Left" Cursor="Hand" Padding="15,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Reports Section -->
+                <Border BorderThickness="1" BorderBrush="#DDDDDD" Background="White" Padding="25" Margin="0,0,0,20" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="REPORTS" FontSize="14" FontWeight="Bold" Foreground="#6B46C1" Margin="0,0,0,20"/>
+                        <TextBlock Text="Generate and view various system reports" FontSize="11" Foreground="#666666" Margin="0,0,0,15"/>
+                        <WrapPanel>
+                            <Button Content="Branch-wise Report" Height="55" Width="170" Margin="0,0,15,15" Click="BranchReport_Click" FontSize="12" FontWeight="Bold" Background="#6B46C1" Foreground="White" Cursor="Hand" Padding="10"/>
+                            <Button Content="School-wise Report" Height="55" Width="170" Margin="0,0,15,15" Click="SchoolReport_Click" FontSize="12" FontWeight="Bold" Background="#6B46C1" Foreground="White" Cursor="Hand" Padding="10"/>
+                            <Button Content="Date-wise Report" Height="55" Width="170" Margin="0,0,0,15" Click="DateReport_Click" FontSize="12" FontWeight="Bold" Background="#6B46C1" Foreground="White" Cursor="Hand" Padding="10"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Utilities Section -->
+                <Border BorderThickness="1" BorderBrush="#DDDDDD" Background="White" Padding="25" Margin="0,0,0,20" CornerRadius="8">
+                    <StackPanel>
+                        <TextBlock Text="UTILITIES" FontSize="14" FontWeight="Bold" Foreground="#00AA00" Margin="0,0,0,20"/>
+                        <TextBlock Text="Backup, restore, and manage system settings" FontSize="11" Foreground="#666666" Margin="0,0,0,15"/>
+                        <WrapPanel>
+                            <Button Content="Backup Database" Height="55" Width="170" Margin="0,0,15,15" Click="Backup_Click" FontSize="12" FontWeight="Bold" Background="#00AA00" Foreground="White" Cursor="Hand" Padding="10"/>
+                            <Button Content="Restore Database" Height="55" Width="170" Margin="0,0,15,15" Click="Restore_Click" FontSize="12" FontWeight="Bold" Background="#00AA00" Foreground="White" Cursor="Hand" Padding="10"/>
+                            <Button Content="Logout" Height="55" Width="170" Click="Logout_Click" FontSize="12" FontWeight="Bold" Background="#FF3333" Foreground="White" Cursor="Hand" Padding="10"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Spacer -->
+                <TextBlock Height="20"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border DockPanel.Dock="Bottom" Height="70" Background="#F0F0F0" BorderThickness="0,1,0,0" BorderBrush="#CCCCCC">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="Shree Computer Services Amravati" 
+                           FontSize="13" 
+                           FontWeight="Bold"
+                           Foreground="#003D7A"
+                           Margin="0,0,0,3"
+                           TextAlignment="Center"/>
+                <TextBlock Text="Phone: 7972339953" 
+                           FontSize="11" 
+                           Foreground="#666666"
+                           Margin="0,0,0,0"
+                           TextAlignment="Center"/>
+                <TextBlock Text="© 2025 All Rights Reserved" 
+                           FontSize="10" 
+                           Foreground="#999999"
+                           Margin="0,5,0,0"
+                           TextAlignment="Center"/>
+            </StackPanel>
+        </Border>
+    </DockPanel>
+</Window>
+

@@ -1,0 +1,23 @@
+<Window x:Class="SchoolPayListSystem.App.Views.MenuView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Main Menu" Height="500" Width="600"
+        WindowStartupLocation="CenterScreen">
+    <Grid Background="#F5F5F5">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="School Pay List Management System" FontSize="24" FontWeight="Bold" TextAlignment="Center" Margin="0,0,0,30"/>
+            
+            <TextBlock Text="Master Data" FontSize="16" FontWeight="Bold" Foreground="#0066CC" Margin="0,0,0,10"/>
+            <Button Content="Add Branch" Height="40" Width="200" Margin="0,0,0,5"/>
+            <Button Content="Add School Type" Height="40" Width="200" Margin="0,0,0,5"/>
+            <Button Content="Add School" Height="40" Width="200" Margin="0,0,0,20"/>
+
+            <TextBlock Text="Salary Entry" FontSize="16" FontWeight="Bold" Foreground="#FF9900" Margin="0,0,0,10"/>
+            <Button Content="Enter Salary" Height="40" Width="200" Margin="0,0,0,20"/>
+
+            <TextBlock Text="Reports" FontSize="16" FontWeight="Bold" Foreground="#CC00FF" Margin="0,0,0,10"/>
+            <Button Content="Branch-wise Report" Height="40" Width="200" Margin="0,0,0,5"/>
+            <Button Content="School-wise Report" Height="40" Width="200" Margin="0,0,0,5"/>
+        </StackPanel>
+    </Grid>
+</Window>

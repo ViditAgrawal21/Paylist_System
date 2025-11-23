@@ -1,0 +1,1 @@
+<Window x:Class="SchoolPayListSystem.App.Views.BranchAdditionView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="Branch Addition" Height="400" Width="500"><Grid><TextBlock Text="Branch Management" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18"/></Grid></Window>
