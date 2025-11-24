@@ -15,3 +15,21 @@ C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSyst
 C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\refint\SchoolPayListSystem.Services.dll
 C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPayListSystem.Services.pdb
 C:\Users\agraw\OneDrive\Desktop\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\ref\SchoolPayListSystem.Services.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\bin\Release\net8.0\SchoolPayListSystem.Services.deps.json
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\bin\Release\net8.0\SchoolPayListSystem.Services.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\bin\Release\net8.0\SchoolPayListSystem.Services.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\bin\Release\net8.0\SchoolPayListSystem.Core.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\bin\Release\net8.0\SchoolPayListSystem.Data.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\bin\Release\net8.0\SchoolPayListSystem.Core.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\bin\Release\net8.0\SchoolPayListSystem.Data.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPayListSystem.Services.csproj.AssemblyReference.cache
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPayListSystem.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPayListSystem.Services.AssemblyInfoInputs.cache
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPayListSystem.Services.AssemblyInfo.cs
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPayListSystem.Services.csproj.CoreCompileInputs.cache
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPayListSystem.Services.sourcelink.json
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPa.21E60A9B.Up2Date
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPayListSystem.Services.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\refint\SchoolPayListSystem.Services.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\SchoolPayListSystem.Services.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Services\obj\Release\net8.0\ref\SchoolPayListSystem.Services.dll

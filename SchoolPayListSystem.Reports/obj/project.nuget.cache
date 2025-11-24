@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "fQ+RdgpYjFM=",
+  "dgSpecHash": "wBllCUSfGKw=",
   "success": true,
   "projectFilePath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Reports\\SchoolPayListSystem.Reports.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\agraw\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.16\\microsoft.net.illink.tasks.8.0.16.nupkg.sha512",
+    "C:\\Users\\agraw\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x64\\8.0.16\\microsoft.netcore.app.runtime.win-x64.8.0.16.nupkg.sha512",
+    "C:\\Users\\agraw\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x64\\8.0.16\\microsoft.windowsdesktop.app.runtime.win-x64.8.0.16.nupkg.sha512",
+    "C:\\Users\\agraw\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x64\\8.0.16\\microsoft.aspnetcore.app.runtime.win-x64.8.0.16.nupkg.sha512"
+  ],
   "logs": []
 }

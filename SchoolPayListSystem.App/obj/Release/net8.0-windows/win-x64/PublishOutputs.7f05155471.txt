@@ -1,0 +1,6 @@
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\win-x64\publish\SchoolPayListSystem.App.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\win-x64\publish\SchoolPayListSystem.Core.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\win-x64\publish\SchoolPayListSystem.Data.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\win-x64\publish\SchoolPayListSystem.Services.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\win-x64\publish\SchoolPayListSystem.Reports.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\win-x64\publish\SchoolPayListSystem.App.exe
