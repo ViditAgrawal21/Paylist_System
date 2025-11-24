@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "CNRB0mul/3o=",
+  "dgSpecHash": "udpaBcS0adI=",
   "success": true,
-  "projectFilePath": "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj",
+  "projectFilePath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\agraw\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\agraw\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

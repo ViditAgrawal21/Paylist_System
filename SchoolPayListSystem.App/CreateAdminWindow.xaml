@@ -34,13 +34,13 @@
             <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0">
                 <StackPanel Margin="40">
                     <!-- Instructions -->
-                    <TextBlock Text="Create your first administrator account" 
+                    <TextBlock Text="Create a new user account" 
                                FontSize="12" Foreground="#666666" 
                                TextWrapping="Wrap"
                                Margin="0,0,0,25"/>
 
-                    <!-- Username Section -->
-                    <TextBlock Text="Username" FontSize="12" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
+                    <!-- User ID Section -->
+                    <TextBlock Text="User ID" FontSize="12" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
                     <TextBox x:Name="UsernameTextBox" Height="45" Padding="12,0" FontSize="13" 
                              Margin="0,0,0,20" 
                              Background="#F5F5F5" 
@@ -48,17 +48,22 @@
                              BorderBrush="#CCCCCC"
                              VerticalContentAlignment="Center"/>
 
-                    <!-- Password Section with Eye Toggle -->
-                    <TextBlock Text="Password" FontSize="12" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
-                    <local:PasswordBoxWithToggle x:Name="PasswordControl" Margin="0,0,0,25"/>
+                    <!-- Full Name Section -->
+                    <TextBlock Text="Full Name" FontSize="12" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
+                    <TextBox x:Name="FullNameTextBox" Height="45" Padding="12,0" FontSize="13" 
+                             Margin="0,0,0,25" 
+                             Background="#F5F5F5" 
+                             BorderThickness="1" 
+                             BorderBrush="#CCCCCC"
+                             VerticalContentAlignment="Center"/>
 
                     <!-- Message Block -->
                     <TextBlock x:Name="MessageBlock" Text="" Foreground="#CC0000" FontSize="11" TextWrapping="Wrap" 
                               Margin="0,0,0,20" MinHeight="25" FontWeight="SemiBold"/>
 
-                    <!-- Create Admin Button -->
+                    <!-- Create User Button -->
                     <Button x:Name="CreateAdminButton"
-                            Content="CREATE ADMIN ACCOUNT" 
+                            Content="CREATE USER" 
                             Height="50" 
                             Background="#00AA00" 
                             Foreground="White" 

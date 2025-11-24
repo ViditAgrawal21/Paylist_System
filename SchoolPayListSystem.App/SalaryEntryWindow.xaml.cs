@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Win32;
 using SchoolPayListSystem.Core;
 using SchoolPayListSystem.Core.Models;
 using SchoolPayListSystem.Data;
@@ -50,10 +51,29 @@ namespace SchoolPayListSystem.App
         {
             try
             {
+                // Display operator name
+                var app = (App)Application.Current;
+                if (app.LoggedInUser != null)
+                {
+                    var operatorDisplay = this.FindName("OperatorNameDisplay") as TextBlock;
+                    if (operatorDisplay != null)
+                    {
+                        operatorDisplay.Text = app.LoggedInUser.FullName ?? app.LoggedInUser.Username;
+                    }
+                }
+
                 await LoadSchools();
                 await LoadBranches();
                 await LoadSchoolTypes();
-                await LoadEntries();
+                
+                // Load only current operator's entries
+                var currentUserEntries = await _salaryService.GetEntriesByOperatorAsync(app.LoggedInUser?.UserId ?? 0);
+                _entries.Clear();
+                foreach (var entry in currentUserEntries.OrderByDescending(x => x.EntryDate))
+                {
+                    _entries.Add(entry);
+                }
+                
                 ClearForm();
             }
             catch (Exception ex)
@@ -72,9 +92,6 @@ namespace SchoolPayListSystem.App
                 {
                     _schools.Add(school);
                 }
-                SchoolCodeCombo.ItemsSource = _schools;
-                SchoolCodeCombo.DisplayMemberPath = "SchoolCode";
-                SchoolCodeCombo.SelectedValuePath = "SchoolId";
             }
             catch (Exception ex)
             {
@@ -133,7 +150,7 @@ namespace SchoolPayListSystem.App
         private void ClearForm()
         {
             var entryDatePicker = this.FindName("EntryDatePicker") as DatePicker;
-            var schoolCodeCombo = this.FindName("SchoolCodeCombo") as ComboBox;
+            var schoolCodeTextBox = this.FindName("SchoolCodeTextBox") as TextBox;
             var schoolNameTextBox = this.FindName("SchoolNameTextBox") as TextBox;
             var accountNoTextBox = this.FindName("AccountNoTextBox") as TextBox;
             var schoolTypeTextBox = this.FindName("SchoolTypeTextBox") as TextBox;
@@ -143,9 +160,10 @@ namespace SchoolPayListSystem.App
             var amount3TextBox = this.FindName("Amount3TextBox") as TextBox;
             var totalAmountDisplay = this.FindName("TotalAmountDisplay") as TextBlock;
             var editButton = this.FindName("EditButton") as Button;
+            var suggestions = this.FindName("SchoolCodeSuggestions") as ListBox;
 
             if (entryDatePicker != null) entryDatePicker.SelectedDate = DateTime.Now;
-            if (schoolCodeCombo != null) schoolCodeCombo.SelectedIndex = -1;
+            if (schoolCodeTextBox != null) schoolCodeTextBox.Clear();
             if (schoolNameTextBox != null) schoolNameTextBox.Clear();
             if (accountNoTextBox != null) accountNoTextBox.Clear();
             if (schoolTypeTextBox != null) schoolTypeTextBox.Clear();
@@ -154,10 +172,11 @@ namespace SchoolPayListSystem.App
             if (amount2TextBox != null) amount2TextBox.Clear();
             if (amount3TextBox != null) amount3TextBox.Clear();
             if (totalAmountDisplay != null) totalAmountDisplay.Text = "₹0.00";
+            if (suggestions != null) suggestions.Visibility = Visibility.Collapsed;
 
             // Enable fields for new entry
             if (entryDatePicker != null) entryDatePicker.IsEnabled = true;
-            if (schoolCodeCombo != null) schoolCodeCombo.IsEnabled = true;
+            if (schoolCodeTextBox != null) schoolCodeTextBox.IsEnabled = true;
             if (amount1TextBox != null) amount1TextBox.IsReadOnly = false;
             if (amount2TextBox != null) amount2TextBox.IsReadOnly = false;
             if (amount3TextBox != null) amount3TextBox.IsReadOnly = false;
@@ -174,10 +193,20 @@ namespace SchoolPayListSystem.App
         {
             try
             {
-                if (SchoolCodeCombo.SelectedIndex == -1 || 
+                if (string.IsNullOrWhiteSpace(SchoolCodeTextBox.Text) || 
                     string.IsNullOrWhiteSpace(Amount1TextBox.Text))
                 {
-                    MessageBox.Show("Please select a school and enter Amount 1.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Please enter school code and Amount 1.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Find school by code
+                var schoolCode = SchoolCodeTextBox.Text.Trim();
+                var selectedSchool = _schools.FirstOrDefault(s => s.SchoolCode == schoolCode);
+                
+                if (selectedSchool == null)
+                {
+                    MessageBox.Show("School code not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
@@ -185,13 +214,9 @@ namespace SchoolPayListSystem.App
                 decimal amount2 = decimal.Parse(Amount2TextBox.Text ?? "0");
                 decimal amount3 = decimal.Parse(Amount3TextBox.Text ?? "0");
 
-                var selectedSchool = SchoolCodeCombo.SelectedItem as SchoolPayListSystem.Core.Models.School;
-                
-                if (selectedSchool == null)
-                {
-                    MessageBox.Show("School not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+                // Get logged-in user
+                var app = (App)Application.Current;
+                int createdByUserId = app.LoggedInUser?.UserId ?? 0;
 
                 var result = await _salaryService.AddSalaryEntryAsync(
                     EntryDatePicker.SelectedDate ?? DateTime.Now,
@@ -200,7 +225,8 @@ namespace SchoolPayListSystem.App
                     selectedSchool.SchoolCode,
                     amount1,
                     amount2,
-                    amount3);
+                    amount3,
+                    createdByUserId);
 
                 if (result.success)
                 {
@@ -290,12 +316,14 @@ namespace SchoolPayListSystem.App
                 _isNewRecord = false;
                 _isEditMode = false;
 
-                // Find and select the school
+                // Find and populate the school
                 var school = _schools.FirstOrDefault(s => s.SchoolId == entry.SchoolId);
                 if (school != null)
                 {
-                    var schoolCodeCombo = this.FindName("SchoolCodeCombo") as ComboBox;
-                    if (schoolCodeCombo != null) schoolCodeCombo.SelectedItem = school;
+                    var schoolCodeTextBox = this.FindName("SchoolCodeTextBox") as TextBox;
+                    if (schoolCodeTextBox != null) schoolCodeTextBox.Text = school.SchoolCode;
+                    
+                    SchoolCode_TextChanged(null, null);
                 }
 
                 var entryDatePicker = this.FindName("EntryDatePicker") as DatePicker;
@@ -317,8 +345,8 @@ namespace SchoolPayListSystem.App
                 if (amount3TextBox != null) amount3TextBox.IsReadOnly = true;
 
                 // Disable other fields when viewing
-                var schoolCodeComboDisable = this.FindName("SchoolCodeCombo") as ComboBox;
-                if (schoolCodeComboDisable != null) schoolCodeComboDisable.IsEnabled = false;
+                var schoolCodeTextBoxDisable = this.FindName("SchoolCodeTextBox") as TextBox;
+                if (schoolCodeTextBoxDisable != null) schoolCodeTextBoxDisable.IsEnabled = false;
                 if (entryDatePicker != null) entryDatePicker.IsEnabled = false;
 
                 // Enable Edit button
@@ -374,48 +402,80 @@ namespace SchoolPayListSystem.App
             }
         }
 
-        private async void SchoolCode_Changed(object sender, SelectionChangedEventArgs e)
+        private async void SchoolCode_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             try
             {
-                if (SchoolCodeCombo.SelectedItem == null)
+                var schoolCodeTextBox = this.FindName("SchoolCodeTextBox") as TextBox;
+                var suggestions = this.FindName("SchoolCodeSuggestions") as ListBox;
+                
+                if (schoolCodeTextBox == null || suggestions == null)
+                    return;
+
+                string searchText = schoolCodeTextBox.Text?.Trim() ?? string.Empty;
+
+                if (string.IsNullOrEmpty(searchText))
                 {
                     // Clear fields if no school is selected
                     SchoolNameTextBox.Clear();
                     AccountNoTextBox.Clear();
                     SchoolTypeTextBox.Clear();
                     BranchNameTextBox.Clear();
+                    suggestions.Visibility = Visibility.Collapsed;
                     return;
                 }
 
-                var school = SchoolCodeCombo.SelectedItem as SchoolPayListSystem.Core.Models.School;
+                // Show matching schools
+                var matching = _schools.Where(s => s.SchoolCode.StartsWith(searchText, StringComparison.OrdinalIgnoreCase)).ToList();
 
-                if (school != null)
+                if (matching.Count > 0)
                 {
-                    // Populate School Name
-                    SchoolNameTextBox.Text = school.SchoolName ?? "";
+                    suggestions.ItemsSource = matching;
+                    suggestions.DisplayMemberPath = "SchoolCode";
+                    suggestions.Visibility = Visibility.Visible;
 
-                    // Populate Account Number
-                    AccountNoTextBox.Text = school.BankAccountNumber ?? "";
-
-                    // Populate School Type - get the type name from SchoolTypeId
-                    var allTypes = await _schoolTypeService.GetAllTypesAsync();
-                    var schoolType = allTypes.FirstOrDefault(t => t.SchoolTypeId == school.SchoolTypeId);
-                    SchoolTypeTextBox.Text = schoolType?.TypeName ?? "";
-
-                    // Populate Branch - get the branch name from BranchId
-                    var allBranches = await _branchService.GetAllBranchesAsync();
-                    var branch = allBranches.FirstOrDefault(b => b.BranchId == school.BranchId);
-                    BranchNameTextBox.Text = branch?.BranchName ?? "";
+                    // If exact match, populate the fields
+                    var exactMatch = matching.FirstOrDefault(s => s.SchoolCode == searchText);
+                    if (exactMatch != null)
+                    {
+                        PopulateSchoolDetails(exactMatch);
+                        suggestions.Visibility = Visibility.Collapsed;
+                    }
                 }
                 else
                 {
-                    // Clear fields if school not found
                     SchoolNameTextBox.Clear();
                     AccountNoTextBox.Clear();
                     SchoolTypeTextBox.Clear();
                     BranchNameTextBox.Clear();
+                    suggestions.Visibility = Visibility.Collapsed;
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void PopulateSchoolDetails(School school)
+        {
+            try
+            {
+                // Populate School Name
+                SchoolNameTextBox.Text = school.SchoolName ?? "";
+
+                // Populate Account Number
+                AccountNoTextBox.Text = school.BankAccountNumber ?? "";
+
+                // Populate School Type
+                var allTypes = await _schoolTypeService.GetAllTypesAsync();
+                var schoolType = allTypes.FirstOrDefault(t => t.SchoolTypeId == school.SchoolTypeId);
+                SchoolTypeTextBox.Text = schoolType?.TypeName ?? "";
+
+                // Populate Branch
+                var allBranches = await _branchService.GetAllBranchesAsync();
+                var branch = allBranches.FirstOrDefault(b => b.BranchId == school.BranchId);
+                BranchNameTextBox.Text = branch?.BranchName ?? "";
             }
             catch (Exception ex)
             {
@@ -423,9 +483,43 @@ namespace SchoolPayListSystem.App
             }
         }
 
+        private void SchoolSuggestion_Selected(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                var suggestions = this.FindName("SchoolCodeSuggestions") as ListBox;
+                var schoolCodeTextBox = this.FindName("SchoolCodeTextBox") as TextBox;
+                
+                if (suggestions?.SelectedItem is School school && schoolCodeTextBox != null)
+                {
+                    schoolCodeTextBox.Text = school.SchoolCode;
+                    PopulateSchoolDetails(school);
+                    suggestions.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void Exit_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void Help_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Create and show School Reference Window
+                var schoolReferenceWindow = new SchoolReferenceWindow(_schools);
+                schoolReferenceWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening help: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void AccountNo_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
@@ -488,6 +582,74 @@ namespace SchoolPayListSystem.App
 
                     // TODO: Implement update in service layer
                     MessageBox.Show("Changes saved successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private async void Import_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var openFileDialog = new OpenFileDialog
+                {
+                    Filter = "Excel Files (*.xlsx)|*.xlsx|All Files (*.*)|*.*",
+                    Title = "Select Salary Import Excel File"
+                };
+
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    var app = (App)Application.Current;
+                    int createdByUserId = app.LoggedInUser?.UserId ?? 0;
+
+                    if (createdByUserId == 0)
+                    {
+                        MessageBox.Show("Please log in first to import data.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    var result = await _salaryService.ImportSalariesFromExcelAsync(openFileDialog.FileName, createdByUserId);
+
+                    if (result.success)
+                    {
+                        string message = $"Import completed!\n\n" +
+                                       $"✓ Successfully imported {result.importedCount} salary entries";
+                        
+                        if (result.errors.Count > 0)
+                        {
+                            message += $"\n⚠ {result.errors.Count} errors encountered:\n\n";
+                            // Show first 10 errors
+                            for (int i = 0; i < Math.Min(10, result.errors.Count); i++)
+                            {
+                                message += $"  • {result.errors[i]}\n";
+                            }
+                            if (result.errors.Count > 10)
+                            {
+                                message += $"\n  ... and {result.errors.Count - 10} more errors";
+                            }
+                        }
+
+                        MessageBox.Show(message, "Import Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                        
+                        // Refresh the grid with updated data
+                        await LoadData();
+                    }
+                    else
+                    {
+                        string message = $"Import failed: {result.message}\n\n";
+                        if (result.errors.Count > 0)
+                        {
+                            message += "Errors:\n";
+                            foreach (var error in result.errors.Take(5))
+                            {
+                                message += $"  • {error}\n";
+                            }
+                        }
+                        MessageBox.Show(message, "Import Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
             }
             catch (Exception ex)

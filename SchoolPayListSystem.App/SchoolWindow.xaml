@@ -49,7 +49,16 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="School Type:" VerticalAlignment="Center" FontWeight="Bold"/>
-                    <ComboBox x:Name="SchoolTypeCombo" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35"/>
+                    <ComboBox x:Name="SchoolTypeCombo" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35" SelectionChanged="SchoolTypeCombo_SelectionChanged"/>
+                </Grid>
+
+                <Grid Height="40" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="School Type Code:" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <TextBox x:Name="SchoolTypeCodeTextBox" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35" IsReadOnly="True" Background="#E8E8E8" Foreground="#666666"/>
                 </Grid>
 
                 <Grid Height="40" Margin="0,0,0,10">
@@ -58,7 +67,16 @@
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="Branch:" VerticalAlignment="Center" FontWeight="Bold"/>
-                    <ComboBox x:Name="BranchCombo" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35"/>
+                    <ComboBox x:Name="BranchCombo" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35" SelectionChanged="BranchCombo_SelectionChanged"/>
+                </Grid>
+
+                <Grid Height="40" Margin="0,0,0,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Branch Code:" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <TextBox x:Name="BranchCodeTextBox" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35" IsReadOnly="True" Background="#E8E8E8" Foreground="#666666"/>
                 </Grid>
 
                 <Grid Height="40" Margin="0,0,0,10">
@@ -81,16 +99,18 @@
             <!-- Records DataGrid -->
             <DataGrid x:Name="SchoolsDataGrid" DockPanel.Dock="Top" AutoGenerateColumns="False" Margin="20,10,20,20" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Code" Binding="{Binding SchoolCode}" Width="100" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="School Name" Binding="{Binding SchoolName}" Width="200" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Type" Binding="{Binding SchoolType.TypeName}" Width="120" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Branch" Binding="{Binding Branch.BranchName}" Width="150" IsReadOnly="True"/>
-                    <DataGridTemplateColumn Header="Action" Width="140">
+                    <DataGridTextColumn Header="Code" Binding="{Binding SchoolCode}" Width="70" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="School Name" Binding="{Binding SchoolName}" Width="150" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Type Code" Binding="{Binding SchoolType.TypeCode}" Width="70" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Type" Binding="{Binding SchoolType.TypeName}" Width="100" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Branch Code" Binding="{Binding Branch.BranchCode}" Width="70" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Branch" Binding="{Binding Branch.BranchName}" Width="100" IsReadOnly="True"/>
+                    <DataGridTemplateColumn Header="Action" Width="120">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button Content="Edit" Width="60" Height="30" Background="#0066CC" Foreground="White" Click="Edit_Click" Margin="0,0,5,0"/>
-                                    <Button Content="Delete" Width="60" Height="30" Background="#FF0000" Foreground="White" Click="Delete_Click"/>
+                                    <Button Content="Edit" Width="50" Height="30" Background="#0066CC" Foreground="White" Click="Edit_Click" Margin="0,0,5,0" FontSize="12"/>
+                                    <Button Content="Delete" Width="50" Height="30" Background="#FF0000" Foreground="White" Click="Delete_Click" FontSize="12"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

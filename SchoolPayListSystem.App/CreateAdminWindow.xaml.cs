@@ -19,49 +19,31 @@ namespace SchoolPayListSystem.App
 
         private async void CreateButton_Click(object sender, RoutedEventArgs e)
         {
-            string username = UsernameTextBox.Text;
-            string password = PasswordControl.Password;
+            string userId = UsernameTextBox.Text?.Trim() ?? string.Empty;
+            string fullName = FullNameTextBox.Text?.Trim() ?? string.Empty;
 
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(fullName))
             {
-                MessageBlock.Text = "Username and password required";
+                MessageBlock.Text = "User ID and Full Name are required";
                 return;
             }
 
             try
             {
-                using (var context = new SchoolPayListDbContext())
+                var (success, message, user) = await _authService.CreateUserAsync(userId, fullName);
+
+                if (success)
                 {
-                    var userRepo = new UserRepository(context);
-                    var existing = await userRepo.GetByUsernameAsync(username);
-
-                    if (existing != null)
-                    {
-                        MessageBlock.Text = "Username already exists";
-                        return;
-                    }
-
-                    var admin = new User
-                    {
-                        Username = username,
-                        PasswordHash = _authService.HashPassword(password),
-                        CreatedAt = DateTime.Now,
-                        IsActive = true,
-                        Role = "Admin"
-                    };
-
-                    await userRepo.AddAsync(admin);
-                    await userRepo.SaveChangesAsync();
-
                     MessageBlock.Foreground = System.Windows.Media.Brushes.Green;
-                    MessageBlock.Text = "Admin created successfully!";
+                    MessageBlock.Text = "User created successfully!";
                     System.Threading.Thread.Sleep(1500);
                     
-                    // Open Login window after successful creation
-                    LoginWindow loginWindow = new LoginWindow();
-                    loginWindow.Show();
-                    
+                    DialogResult = true;
                     Close();
+                }
+                else
+                {
+                    MessageBlock.Text = message;
                 }
             }
             catch (Exception ex)
@@ -72,6 +54,7 @@ namespace SchoolPayListSystem.App
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
+            DialogResult = false;
             Close();
         }
     }

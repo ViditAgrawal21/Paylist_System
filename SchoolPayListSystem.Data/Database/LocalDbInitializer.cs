@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using SchoolPayListSystem.Core.Models;
 using SQLitePCL;
+using Microsoft.EntityFrameworkCore;
 
 namespace SchoolPayListSystem.Data.Database
 {
@@ -78,6 +79,47 @@ namespace SchoolPayListSystem.Data.Database
                 {
                     context.Database.EnsureCreated();
 
+                    // Add new columns to SalaryEntry if they don't exist (for existing databases)
+                    try
+                    {
+                        var connection = context.Database.GetDbConnection();
+                        connection.Open();
+                        using (var command = connection.CreateCommand())
+                        {
+                            // Check if EntryTime column exists, if not add it
+                            command.CommandText = "PRAGMA table_info(SalaryEntries)";
+                            var reader = command.ExecuteReader();
+                            bool hasEntryTime = false;
+                            bool hasOperatorName = false;
+                            
+                            while (reader.Read())
+                            {
+                                string columnName = reader["name"].ToString();
+                                if (columnName == "EntryTime") hasEntryTime = true;
+                                if (columnName == "OperatorName") hasOperatorName = true;
+                            }
+                            reader.Close();
+
+                            // Add missing columns
+                            if (!hasEntryTime)
+                            {
+                                command.CommandText = "ALTER TABLE SalaryEntries ADD COLUMN EntryTime TEXT";
+                                command.ExecuteNonQuery();
+                            }
+
+                            if (!hasOperatorName)
+                            {
+                                command.CommandText = "ALTER TABLE SalaryEntries ADD COLUMN OperatorName TEXT";
+                                command.ExecuteNonQuery();
+                            }
+                        }
+                        connection.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Warning: Could not add new columns to SalaryEntries table: {ex.Message}");
+                    }
+
                     if (!context.SchoolTypes.Any())
                     {
                         context.SchoolTypes.AddRange(
@@ -100,8 +142,8 @@ namespace SchoolPayListSystem.Data.Database
                     if (!context.Users.Any())
                     {
                         // Hard-coded GCP admin credentials
-                        string gcpAdminUsername = "gcpadmin";
-                        string gcpAdminPassword = "GCP@Admin123"; // Default GCP admin password
+                        string gcpAdminUsername = "GCP";
+                        string gcpAdminPassword = "GCP"; // Default GCP admin password
                         
                         // Hash the password
                         string hashedPassword = HashPassword(gcpAdminPassword);
@@ -110,6 +152,7 @@ namespace SchoolPayListSystem.Data.Database
                             new User
                             {
                                 Username = gcpAdminUsername,
+                                FullName = "GCP Administrator",
                                 PasswordHash = hashedPassword,
                                 CreatedAt = DateTime.Now,
                                 IsActive = true,

@@ -12,6 +12,7 @@ namespace SchoolPayListSystem.Data.Repositories
     {
         Task<List<SalaryEntry>> GetByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<List<SalaryEntry>> GetAllWithNavigationAsync();
+        Task<List<SalaryEntry>> GetByCreatedByUserIdAsync(int createdByUserId);
     }
 
     public class SalaryEntryRepository : BaseRepository<SalaryEntry>, ISalaryEntryRepository
@@ -30,6 +31,16 @@ namespace SchoolPayListSystem.Data.Repositories
         public async Task<List<SalaryEntry>> GetAllWithNavigationAsync()
         {
             return await _dbSet.Include(s => s.School).Include(s => s.Branch).ToListAsync();
+        }
+
+        public async Task<List<SalaryEntry>> GetByCreatedByUserIdAsync(int createdByUserId)
+        {
+            return await _dbSet
+                .Where(s => s.CreatedByUserId == createdByUserId)
+                .Include(s => s.School)
+                .Include(s => s.Branch)
+                .OrderByDescending(s => s.EntryDate)
+                .ToListAsync();
         }
     }
 }

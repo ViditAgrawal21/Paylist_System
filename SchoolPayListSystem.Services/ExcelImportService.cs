@@ -201,7 +201,10 @@ namespace SchoolPayListSystem.Services
                 using var package = new ExcelPackage(new FileInfo(filePath));
                 var worksheet = package.Workbook.Worksheets[0];
                 
-                // Expected columns: SchoolCode, SchoolName, SchoolType, Branch, BankAccount
+                // Multiple formats supported:
+                // New format: SchoolCode, SchoolName, SchoolTypeCode, SchoolType, BranchCode, Branch, BankAccount
+                // Old format: SchoolCode, SchoolName, SchoolType, BranchCode, Branch, BankAccount
+                // Legacy: SchoolCode, SchoolName, SchoolType, Branch, BankAccount
                 var rowCount = worksheet.Dimension?.Rows ?? 0;
                 
                 if (rowCount < 2)
@@ -209,9 +212,39 @@ namespace SchoolPayListSystem.Services
                     return (false, "Excel file must contain at least one data row (plus header)", errors);
                 }
 
+                // Detect format by checking headers
+                var headerRow1 = worksheet.Cells[1, 1].Text?.Trim().ToLower() ?? "";
+                var headerRow2 = worksheet.Cells[1, 2].Text?.Trim().ToLower() ?? "";
+                var headerRow3 = worksheet.Cells[1, 3].Text?.Trim().ToLower() ?? "";
+                var headerRow4 = worksheet.Cells[1, 4].Text?.Trim().ToLower() ?? "";
+                var headerRow5 = worksheet.Cells[1, 5].Text?.Trim().ToLower() ?? "";
+                var headerRow6 = worksheet.Cells[1, 6].Text?.Trim().ToLower() ?? "";
+                var headerRow7 = worksheet.Cells[1, 7].Text?.Trim().ToLower() ?? "";
+
+                bool hasSchoolTypeCode = headerRow3 == "schooltypecode";
+                bool hasBranchCode = hasSchoolTypeCode ? headerRow5 == "branchcode" : headerRow4 == "branchcode";
+                
+                int expectedColumns;
+                string[] expectedHeaders;
+
+                if (hasSchoolTypeCode)
+                {
+                    expectedColumns = 7;
+                    expectedHeaders = new[] { "schoolcode", "schoolname", "schooltypecode", "schooltype", "branchcode", "branch", "bankaccount" };
+                }
+                else if (hasBranchCode)
+                {
+                    expectedColumns = 6;
+                    expectedHeaders = new[] { "schoolcode", "schoolname", "schooltype", "branchcode", "branch", "bankaccount" };
+                }
+                else
+                {
+                    expectedColumns = 5;
+                    expectedHeaders = new[] { "schoolcode", "schoolname", "schooltype", "branch", "bankaccount" };
+                }
+
                 // Validate headers
-                var expectedHeaders = new[] { "schoolcode", "schoolname", "schooltype", "branch", "bankaccount" };
-                for (int col = 1; col <= expectedHeaders.Length; col++)
+                for (int col = 1; col <= expectedColumns; col++)
                 {
                     var header = worksheet.Cells[1, col].Text?.Trim().ToLower();
                     if (header != expectedHeaders[col - 1])
@@ -229,11 +262,42 @@ namespace SchoolPayListSystem.Services
                 {
                     try
                     {
-                        var schoolCode = worksheet.Cells[row, 1].Text?.Trim();
-                        var schoolName = worksheet.Cells[row, 2].Text?.Trim();
-                        var schoolType = worksheet.Cells[row, 3].Text?.Trim();
-                        var branch = worksheet.Cells[row, 4].Text?.Trim();
-                        var bankAccount = worksheet.Cells[row, 5].Text?.Trim();
+                        string schoolCode, schoolName, schoolTypeIdentifier, branchIdentifier, bankAccount;
+                        
+                        if (hasSchoolTypeCode)
+                        {
+                            schoolCode = worksheet.Cells[row, 1].Text?.Trim();
+                            schoolName = worksheet.Cells[row, 2].Text?.Trim();
+                            var schoolTypeCodeStr = worksheet.Cells[row, 3].Text?.Trim();
+                            var schoolTypeStr = worksheet.Cells[row, 4].Text?.Trim();
+                            schoolTypeIdentifier = !string.IsNullOrWhiteSpace(schoolTypeCodeStr) ? schoolTypeCodeStr : schoolTypeStr;
+                            
+                            var branchCodeStr = worksheet.Cells[row, 5].Text?.Trim();
+                            var branchStr = worksheet.Cells[row, 6].Text?.Trim();
+                            branchIdentifier = !string.IsNullOrWhiteSpace(branchCodeStr) ? branchCodeStr : branchStr;
+                            
+                            bankAccount = worksheet.Cells[row, 7].Text?.Trim();
+                        }
+                        else if (hasBranchCode)
+                        {
+                            schoolCode = worksheet.Cells[row, 1].Text?.Trim();
+                            schoolName = worksheet.Cells[row, 2].Text?.Trim();
+                            schoolTypeIdentifier = worksheet.Cells[row, 3].Text?.Trim();
+                            
+                            var branchCodeStr = worksheet.Cells[row, 4].Text?.Trim();
+                            var branchStr = worksheet.Cells[row, 5].Text?.Trim();
+                            branchIdentifier = !string.IsNullOrWhiteSpace(branchCodeStr) ? branchCodeStr : branchStr;
+                            
+                            bankAccount = worksheet.Cells[row, 6].Text?.Trim();
+                        }
+                        else
+                        {
+                            schoolCode = worksheet.Cells[row, 1].Text?.Trim();
+                            schoolName = worksheet.Cells[row, 2].Text?.Trim();
+                            schoolTypeIdentifier = worksheet.Cells[row, 3].Text?.Trim();
+                            branchIdentifier = worksheet.Cells[row, 4].Text?.Trim();
+                            bankAccount = worksheet.Cells[row, 5].Text?.Trim();
+                        }
 
                         // Validate required fields
                         if (string.IsNullOrWhiteSpace(schoolCode))
@@ -248,31 +312,49 @@ namespace SchoolPayListSystem.Services
                             continue;
                         }
 
-                        if (string.IsNullOrWhiteSpace(schoolType))
+                        if (string.IsNullOrWhiteSpace(schoolTypeIdentifier))
                         {
                             errors.Add($"Row {row}: School Type cannot be empty");
                             continue;
                         }
 
-                        if (string.IsNullOrWhiteSpace(branch))
+                        if (string.IsNullOrWhiteSpace(branchIdentifier))
                         {
                             errors.Add($"Row {row}: Branch cannot be empty");
                             continue;
                         }
 
-                        // Find school type ID by name
-                        var schoolTypeObj = schoolTypes.Find(st => st.TypeName.Equals(schoolType, StringComparison.OrdinalIgnoreCase));
+                        // Find school type - first try by code, then by name
+                        SchoolType schoolTypeObj = null;
+                        schoolTypeObj = schoolTypes.Find(st => st.TypeCode?.Equals(schoolTypeIdentifier, StringComparison.OrdinalIgnoreCase) ?? false);
+                        
                         if (schoolTypeObj == null)
                         {
-                            errors.Add($"Row {row}: School Type '{schoolType}' not found. Please add it first.");
+                            schoolTypeObj = schoolTypes.Find(st => st.TypeName.Equals(schoolTypeIdentifier, StringComparison.OrdinalIgnoreCase));
+                        }
+
+                        if (schoolTypeObj == null)
+                        {
+                            errors.Add($"Row {row}: School Type '{schoolTypeIdentifier}' not found. Please add it first.");
                             continue;
                         }
 
-                        // Find branch ID by name
-                        var branchObj = branches.Find(b => b.BranchName.Equals(branch, StringComparison.OrdinalIgnoreCase));
+                        // Find branch - first try by code (if numeric), then by name
+                        Branch branchObj = null;
+                        if (int.TryParse(branchIdentifier, out int branchCode))
+                        {
+                            branchObj = branches.Find(b => b.BranchCode == branchCode);
+                        }
+
                         if (branchObj == null)
                         {
-                            errors.Add($"Row {row}: Branch '{branch}' not found. Please add it first.");
+                            // Try by name
+                            branchObj = branches.Find(b => b.BranchName.Equals(branchIdentifier, StringComparison.OrdinalIgnoreCase));
+                        }
+
+                        if (branchObj == null)
+                        {
+                            errors.Add($"Row {row}: Branch '{branchIdentifier}' not found. Please add it first.");
                             continue;
                         }
 
@@ -362,31 +444,117 @@ namespace SchoolPayListSystem.Services
             // Headers
             worksheet.Cells[1, 1].Value = "SchoolCode";
             worksheet.Cells[1, 2].Value = "SchoolName";
-            worksheet.Cells[1, 3].Value = "SchoolType";
-            worksheet.Cells[1, 4].Value = "Branch";
-            worksheet.Cells[1, 5].Value = "BankAccount";
+            worksheet.Cells[1, 3].Value = "SchoolTypeCode";
+            worksheet.Cells[1, 4].Value = "SchoolType";
+            worksheet.Cells[1, 5].Value = "BranchCode";
+            worksheet.Cells[1, 6].Value = "Branch";
+            worksheet.Cells[1, 7].Value = "BankAccount";
             
             // Sample data
             worksheet.Cells[2, 1].Value = "SCH001";
             worksheet.Cells[2, 2].Value = "ABC Primary School";
-            worksheet.Cells[2, 3].Value = "Primary School";
-            worksheet.Cells[2, 4].Value = "Main Branch";
-            worksheet.Cells[2, 5].Value = "1234567890";
+            worksheet.Cells[2, 3].Value = "PS";
+            worksheet.Cells[2, 4].Value = "Primary School";
+            worksheet.Cells[2, 5].Value = 101;
+            worksheet.Cells[2, 6].Value = "Main Branch";
+            worksheet.Cells[2, 7].Value = "1234567890";
             
             worksheet.Cells[3, 1].Value = "SCH002";
             worksheet.Cells[3, 2].Value = "XYZ High School";
-            worksheet.Cells[3, 3].Value = "High School";
-            worksheet.Cells[3, 4].Value = "East Branch";
-            worksheet.Cells[3, 5].Value = "0987654321";
+            worksheet.Cells[3, 3].Value = "HS";
+            worksheet.Cells[3, 4].Value = "High School";
+            worksheet.Cells[3, 5].Value = 102;
+            worksheet.Cells[3, 6].Value = "East Branch";
+            worksheet.Cells[3, 7].Value = "0987654321";
+            
+            worksheet.Cells[4, 1].Value = "SCH003";
+            worksheet.Cells[4, 2].Value = "PQR Junior College";
+            worksheet.Cells[4, 3].Value = "JC";
+            worksheet.Cells[4, 4].Value = "Junior College";
+            worksheet.Cells[4, 5].Value = 101;
+            worksheet.Cells[4, 6].Value = "Main Branch";
+            worksheet.Cells[4, 7].Value = "1122334455";
             
             // Format headers
-            worksheet.Cells[1, 1, 1, 5].Style.Font.Bold = true;
+            worksheet.Cells[1, 1, 1, 7].Style.Font.Bold = true;
             worksheet.Column(1).AutoFit();
             worksheet.Column(2).AutoFit();
             worksheet.Column(3).AutoFit();
             worksheet.Column(4).AutoFit();
             worksheet.Column(5).AutoFit();
+            worksheet.Column(6).AutoFit();
+            worksheet.Column(7).AutoFit();
             
+            package.SaveAs(new FileInfo(filePath));
+        }
+
+        /// <summary>
+        /// Generate salary import template Excel file
+        /// Columns: A-C (not used), D: BankAccount, E: SchoolTypeCode, F: SchoolType, G: BranchCode, H: Branch
+        /// I: AMOUNT, J: AMOUNT1, K: AMOUNT2, L: AdviceNumber, M: OperatorName, N: STAMPDATE, O: STAMPTIME, P: UserID
+        /// </summary>
+        public void GenerateSalaryImportTemplate(string filePath)
+        {
+            var package = new ExcelPackage();
+            var worksheet = package.Workbook.Worksheets.Add("SalaryImport");
+
+            // Set headers in row 1
+            // Columns A-C are empty (padding for alignment)
+            worksheet.Cells[1, 4].Value = "BankAccount";
+            worksheet.Cells[1, 5].Value = "SchoolTypeCode";
+            worksheet.Cells[1, 6].Value = "SchoolType";
+            worksheet.Cells[1, 7].Value = "BranchCode";
+            worksheet.Cells[1, 8].Value = "Branch";
+            worksheet.Cells[1, 9].Value = "AMOUNT";
+            worksheet.Cells[1, 10].Value = "AMOUNT1";
+            worksheet.Cells[1, 11].Value = "AMOUNT2";
+            worksheet.Cells[1, 12].Value = "AdviceNumber";
+            worksheet.Cells[1, 13].Value = "OperatorName";
+            worksheet.Cells[1, 14].Value = "STAMPDATE";
+            worksheet.Cells[1, 15].Value = "STAMPTIME";
+            worksheet.Cells[1, 16].Value = "UserID";
+
+            // Sample data row 1
+            worksheet.Cells[2, 4].Value = "1234567890";
+            worksheet.Cells[2, 5].Value = "PS";
+            worksheet.Cells[2, 6].Value = "Primary School";
+            worksheet.Cells[2, 7].Value = 101;
+            worksheet.Cells[2, 8].Value = "Main Branch";
+            worksheet.Cells[2, 9].Value = 25000;
+            worksheet.Cells[2, 10].Value = 10000;
+            worksheet.Cells[2, 11].Value = 8000;
+            worksheet.Cells[2, 12].Value = "250101001";
+            worksheet.Cells[2, 13].Value = "Operator1";
+            worksheet.Cells[2, 14].Value = DateTime.Now.ToString("yyyy-MM-dd");
+            worksheet.Cells[2, 15].Value = "09:30:00";
+            worksheet.Cells[2, 16].Value = 1;
+
+            // Sample data row 2
+            worksheet.Cells[3, 4].Value = "0987654321";
+            worksheet.Cells[3, 5].Value = "HS";
+            worksheet.Cells[3, 6].Value = "High School";
+            worksheet.Cells[3, 7].Value = 102;
+            worksheet.Cells[3, 8].Value = "East Branch";
+            worksheet.Cells[3, 9].Value = 35000;
+            worksheet.Cells[3, 10].Value = 15000;
+            worksheet.Cells[3, 11].Value = 12000;
+            worksheet.Cells[3, 12].Value = "250101002";
+            worksheet.Cells[3, 13].Value = "Operator2";
+            worksheet.Cells[3, 14].Value = DateTime.Now.ToString("yyyy-MM-dd");
+            worksheet.Cells[3, 15].Value = "10:15:00";
+            worksheet.Cells[3, 16].Value = 2;
+
+            // Format headers
+            worksheet.Cells[1, 4, 1, 16].Style.Font.Bold = true;
+            worksheet.Cells[1, 4, 1, 16].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            worksheet.Cells[1, 4, 1, 16].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+
+            // Auto-fit columns
+            for (int col = 4; col <= 16; col++)
+            {
+                worksheet.Column(col).AutoFit();
+            }
+
             package.SaveAs(new FileInfo(filePath));
         }
     }

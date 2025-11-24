@@ -59,6 +59,12 @@ namespace SchoolPayListSystem.Data.Database
                 .HasForeignKey(se => se.BranchId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<SalaryEntry>()
+                .HasOne(se => se.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(se => se.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Branch>().HasIndex(b => b.BranchCode).IsUnique();
             modelBuilder.Entity<School>().HasIndex(s => s.SchoolCode).IsUnique();
         }

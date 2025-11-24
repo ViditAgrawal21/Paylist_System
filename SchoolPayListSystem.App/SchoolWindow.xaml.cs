@@ -170,6 +170,10 @@ namespace SchoolPayListSystem.App
                 schoolNameTextBox?.Clear();
                 var accountNumberTextBox = this.FindName("AccountNumberTextBox") as TextBox;
                 accountNumberTextBox?.Clear();
+                var branchCodeTextBox = this.FindName("BranchCodeTextBox") as TextBox;
+                branchCodeTextBox?.Clear();
+                var schoolTypeCodeTextBox = this.FindName("SchoolTypeCodeTextBox") as TextBox;
+                schoolTypeCodeTextBox?.Clear();
                 var schoolTypeCombo = this.FindName("SchoolTypeCombo") as ComboBox;
                 if (schoolTypeCombo != null) schoolTypeCombo.SelectedIndex = -1;
                 var branchCombo = this.FindName("BranchCombo") as ComboBox;
@@ -200,6 +204,50 @@ namespace SchoolPayListSystem.App
             }
         }
 
+        private void BranchCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                var branchCombo = sender as ComboBox;
+                var branchCodeTextBox = this.FindName("BranchCodeTextBox") as TextBox;
+                
+                if (branchCombo?.SelectedItem is Branch selectedBranch && branchCodeTextBox != null)
+                {
+                    branchCodeTextBox.Text = selectedBranch.BranchCode.ToString();
+                }
+                else if (branchCodeTextBox != null)
+                {
+                    branchCodeTextBox.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error updating branch code: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SchoolTypeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                var schoolTypeCombo = sender as ComboBox;
+                var schoolTypeCodeTextBox = this.FindName("SchoolTypeCodeTextBox") as TextBox;
+                
+                if (schoolTypeCombo?.SelectedItem is SchoolType selectedSchoolType && schoolTypeCodeTextBox != null)
+                {
+                    schoolTypeCodeTextBox.Text = selectedSchoolType.TypeCode ?? "";
+                }
+                else if (schoolTypeCodeTextBox != null)
+                {
+                    schoolTypeCodeTextBox.Clear();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error updating school type code: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void UnlockCodeField()
         {
             var schoolCodeTextBox = this.FindName("SchoolCodeTextBox") as TextBox;
@@ -225,6 +273,8 @@ namespace SchoolPayListSystem.App
                 var schoolCodeTextBox = this.FindName("SchoolCodeTextBox") as TextBox;
                 var schoolNameTextBox = this.FindName("SchoolNameTextBox") as TextBox;
                 var accountNumberTextBox = this.FindName("AccountNumberTextBox") as TextBox;
+                var branchCodeTextBox = this.FindName("BranchCodeTextBox") as TextBox;
+                var schoolTypeCodeTextBox = this.FindName("SchoolTypeCodeTextBox") as TextBox;
                 var schoolTypeCombo = this.FindName("SchoolTypeCombo") as ComboBox;
                 var branchCombo = this.FindName("BranchCombo") as ComboBox;
                 
@@ -232,7 +282,9 @@ namespace SchoolPayListSystem.App
                 if (schoolNameTextBox != null) schoolNameTextBox.Text = school.SchoolName;
                 if (accountNumberTextBox != null) accountNumberTextBox.Text = school.BankAccountNumber ?? "";
                 if (schoolTypeCombo != null) schoolTypeCombo.SelectedValue = school.SchoolTypeId;
+                if (schoolTypeCodeTextBox != null && school.SchoolType != null) schoolTypeCodeTextBox.Text = school.SchoolType.TypeCode ?? "";
                 if (branchCombo != null) branchCombo.SelectedValue = school.BranchId;
+                if (branchCodeTextBox != null && school.Branch != null) branchCodeTextBox.Text = school.Branch.BranchCode.ToString();
                 
                 _selectedSchoolId = school.SchoolId;
                 

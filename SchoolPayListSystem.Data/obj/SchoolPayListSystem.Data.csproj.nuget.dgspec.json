@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj": {}
+    "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj": {}
   },
   "projects": {
-    "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj": {
+    "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj",
+        "projectUniqueName": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj",
         "projectName": "SchoolPayListSystem.Core",
-        "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj",
+        "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj",
         "packagesPath": "C:\\Users\\agraw\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\obj\\",
+        "outputPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -67,14 +67,14 @@
         }
       }
     },
-    "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj": {
+    "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj",
+        "projectUniqueName": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj",
         "projectName": "SchoolPayListSystem.Data",
-        "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj",
+        "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj",
         "packagesPath": "C:\\Users\\agraw\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\obj\\",
+        "outputPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -93,8 +93,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj": {
-                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj"
+              "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj": {
+                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj"
               }
             }
           }

@@ -51,6 +51,27 @@ namespace SchoolPayListSystem.App
             window.ShowDialog();
         }
 
+        private void SchoolTypeSummary_Click(object sender, RoutedEventArgs e)
+        {
+            ReportWindow window = new ReportWindow();
+            window.ReportType = "SchoolTypeSummary";
+            window.ShowDialog();
+        }
+
+        private void BranchDetail_Click(object sender, RoutedEventArgs e)
+        {
+            ReportWindow window = new ReportWindow();
+            window.ReportType = "BranchDetail";
+            window.ShowDialog();
+        }
+
+        private void SchoolTypeDetail_Click(object sender, RoutedEventArgs e)
+        {
+            ReportWindow window = new ReportWindow();
+            window.ReportType = "SchoolTypeDetail";
+            window.ShowDialog();
+        }
+
         private void Backup_Click(object sender, RoutedEventArgs e)
         {
             BackupWindow window = new BackupWindow();

@@ -16,16 +16,75 @@ namespace SchoolPayListSystem.Services
             _userRepository = userRepository;
         }
 
-        public async Task<(bool success, string message, User user)> LoginAsync(string username, string password)
+        /// <summary>
+        /// Login with ID only (no password required)
+        /// </summary>
+        public async Task<(bool success, string message, User user)> LoginAsync(string userId)
         {
-            var user = await _userRepository.GetByUsernameAsync(username);
-            if (user == null)
-                return (false, "User not found", null);
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userId))
+                    return (false, "User ID is required", null);
 
-            if (!ValidatePassword(password, user.PasswordHash))
-                return (false, "Invalid password", null);
+                var user = await _userRepository.GetByUsernameAsync(userId);
+                if (user == null)
+                    return (false, "User not found", null);
 
-            return (true, "Login successful", user);
+                if (!user.IsActive)
+                    return (false, "User account is inactive", null);
+
+                return (true, "Login successful", user);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Login error: {ex.Message}", null);
+            }
+        }
+
+        /// <summary>
+        /// Create a new user with ID and Name (no password)
+        /// </summary>
+        public async Task<(bool success, string message, User user)> CreateUserAsync(string userId, string fullName)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(userId))
+                    return (false, "User ID is required", null);
+
+                if (string.IsNullOrWhiteSpace(fullName))
+                    return (false, "Full Name is required", null);
+
+                var existingUser = await _userRepository.GetByUsernameAsync(userId);
+                if (existingUser != null)
+                    return (false, "User ID already exists", null);
+
+                var newUser = new User
+                {
+                    Username = userId,
+                    FullName = fullName,
+                    PasswordHash = "", // No password needed
+                    CreatedAt = DateTime.Now,
+                    IsActive = true,
+                    Role = "User"
+                };
+
+                await _userRepository.AddAsync(newUser);
+                await _userRepository.SaveChangesAsync();
+
+                return (true, "User created successfully", newUser);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error creating user: {ex.Message}", null);
+            }
+        }
+
+        /// <summary>
+        /// Get user by ID (username)
+        /// </summary>
+        public async Task<User> GetUserByIdAsync(string userId)
+        {
+            return await _userRepository.GetByUsernameAsync(userId);
         }
 
         public string HashPassword(string password)

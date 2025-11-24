@@ -49,11 +49,11 @@
                 <Border BorderThickness="1" BorderBrush="#DDDDDD" Background="White" Padding="25" Margin="0,0,0,20" CornerRadius="8">
                     <StackPanel>
                         <TextBlock Text="REPORTS" FontSize="14" FontWeight="Bold" Foreground="#6B46C1" Margin="0,0,0,20"/>
-                        <TextBlock Text="Generate and view various system reports" FontSize="11" Foreground="#666666" Margin="0,0,0,15"/>
+                        <TextBlock Text="Generate professional bank pay list reports" FontSize="11" Foreground="#666666" Margin="0,0,0,15"/>
                         <WrapPanel>
-                            <Button Content="Branch-wise Report" Height="55" Width="170" Margin="0,0,15,15" Click="BranchReport_Click" FontSize="12" FontWeight="Bold" Background="#6B46C1" Foreground="White" Cursor="Hand" Padding="10"/>
-                            <Button Content="School-wise Report" Height="55" Width="170" Margin="0,0,15,15" Click="SchoolReport_Click" FontSize="12" FontWeight="Bold" Background="#6B46C1" Foreground="White" Cursor="Hand" Padding="10"/>
-                            <Button Content="Date-wise Report" Height="55" Width="170" Margin="0,0,0,15" Click="DateReport_Click" FontSize="12" FontWeight="Bold" Background="#6B46C1" Foreground="White" Cursor="Hand" Padding="10"/>
+                            <Button Content="School Type Summary" Height="55" Width="200" Margin="0,0,15,15" Click="SchoolTypeSummary_Click" FontSize="12" FontWeight="Bold" Background="#6B46C1" Foreground="White" Cursor="Hand" Padding="10"/>
+                            <Button Content="Branch Detail Report" Height="55" Width="200" Margin="0,0,15,15" Click="BranchDetail_Click" FontSize="12" FontWeight="Bold" Background="#6B46C1" Foreground="White" Cursor="Hand" Padding="10"/>
+                            <Button Content="School Type Detail" Height="55" Width="200" Margin="0,0,0,15" Click="SchoolTypeDetail_Click" FontSize="12" FontWeight="Bold" Background="#6B46C1" Foreground="White" Cursor="Hand" Padding="10"/>
                         </WrapPanel>
                     </StackPanel>
                 </Border>

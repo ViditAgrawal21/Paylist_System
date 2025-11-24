@@ -30,8 +30,26 @@
                         <ColumnDefinition Width="150"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Operator:" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <TextBlock x:Name="OperatorNameDisplay" Grid.Column="1" Margin="15,0,0,0" VerticalAlignment="Center" Foreground="#0066CC" FontWeight="Bold" Text="Not logged in"/>
+                </Grid>
+
+                <Grid Height="40" Margin="15,15,15,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="Date:" VerticalAlignment="Center" FontWeight="Bold"/>
                     <DatePicker x:Name="EntryDatePicker" Grid.Column="1" Margin="15,0,0,0" Height="35"/>
+                </Grid>
+
+                <Grid Height="40" Margin="15,15,15,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="School Code:" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <TextBox x:Name="SchoolCodeTextBox" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35" TextChanged="SchoolCode_TextChanged"/>
                 </Grid>
 
                 <Grid Height="40" Margin="0,0,0,10">
@@ -39,8 +57,8 @@
                         <ColumnDefinition Width="150"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="School Code:" VerticalAlignment="Center" FontWeight="Bold"/>
-                    <ComboBox x:Name="SchoolCodeCombo" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35" SelectionChanged="SchoolCode_Changed"/>
+                    <TextBlock Grid.Column="0" Text="" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <ListBox x:Name="SchoolCodeSuggestions" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="100" Visibility="Collapsed" SelectionChanged="SchoolSuggestion_Selected"/>
                 </Grid>
 
                 <Grid Height="40" Margin="0,0,0,10">
@@ -124,9 +142,11 @@
                 <StackPanel Orientation="Horizontal" Margin="0,15,0,0">
                     <Button Content="Add New" Width="100" Height="40" Background="#00AA00" Foreground="White" Click="AddNew_Click" Margin="0,0,10,0"/>
                     <Button x:Name="EditButton" Content="Edit" Width="100" Height="40" Background="#FF9900" Foreground="White" Click="Edit_Click" Margin="0,0,10,0" IsEnabled="False"/>
+                    <Button Content="Import" Width="100" Height="40" Background="#0099CC" Foreground="White" Click="Import_Click" Margin="0,0,10,0"/>
                     <Button Content="Previous" Width="100" Height="40" Background="#0066CC" Foreground="White" Click="Previous_Click" Margin="0,0,10,0"/>
                     <Button Content="Next" Width="100" Height="40" Background="#0066CC" Foreground="White" Click="Next_Click" Margin="0,0,10,0"/>
                     <Button Content="Delete" Width="100" Height="40" Background="#FF0000" Foreground="White" Click="Delete_Click" Margin="0,0,10,0"/>
+                    <Button Content="Help" Width="100" Height="40" Background="#9C27B0" Foreground="White" Click="Help_Click" Margin="0,0,10,0"/>
                     <Button Content="Exit" Width="100" Height="40" Background="#FF9900" Foreground="White" Click="Exit_Click"/>
                 </StackPanel>
             </StackPanel>

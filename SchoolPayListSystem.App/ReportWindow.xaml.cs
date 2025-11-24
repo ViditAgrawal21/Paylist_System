@@ -7,63 +7,76 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using SchoolPayListSystem.Core.Models;
-using SchoolPayListSystem.Data;
+using SchoolPayListSystem.Core.DTOs;
 using SchoolPayListSystem.Data.Database;
 using SchoolPayListSystem.Data.Repositories;
 using SchoolPayListSystem.Services;
+using SchoolPayListSystem.Reports;
 
 namespace SchoolPayListSystem.App
 {
     public partial class ReportWindow : Window
     {
-        private readonly SalaryService _salaryService;
+        private readonly ReportService _reportService;
+        private readonly SchoolTypeService _schoolTypeService;
         private readonly BranchService _branchService;
-        private readonly SchoolService _schoolService;
+        private readonly HtmlPdfGenerator _pdfGenerator;
+        public string ReportType { get; set; } = "SchoolTypeSummary";
+
+        // Store current report data for export
+        private List<BranchReportDTO> _currentSchoolTypeSummaryReport;
+        private BranchDetailReportDTO _currentBranchDetailReport;
+        private List<SchoolTypeDetailReportDTO> _currentSchoolTypeDetailReport;
+        private User _currentLoggedInUser;
+        private DateTime _currentReportDate;
+        private string _currentSchoolTypeName;
+        private string _currentBranchName;
 
         public ReportWindow()
         {
             InitializeComponent();
             
             var context = new SchoolPayListDbContext();
-            _salaryService = new SalaryService(new SalaryEntryRepository(context));
+            _reportService = new ReportService(context, new SalaryEntryRepository(context));
+            _schoolTypeService = new SchoolTypeService(new SchoolTypeRepository(context));
             _branchService = new BranchService(new BranchRepository(context));
-            _schoolService = new SchoolService(new SchoolRepository(context));
+            _pdfGenerator = new HtmlPdfGenerator();
             
-            ReportTypeCombo.SelectedIndex = 0;
-            FromDatePicker.SelectedDate = DateTime.Now.AddMonths(-1);
-            ToDatePicker.SelectedDate = DateTime.Now;
+            ReportDatePicker.SelectedDate = DateTime.Now;
             
             Loaded += async (s, e) => await LoadFilterOptions();
-            ReportTypeCombo.SelectionChanged += async (s, e) => await LoadFilterOptions();
         }
 
         private async System.Threading.Tasks.Task LoadFilterOptions()
         {
             try
             {
-                var selectedType = (ReportTypeCombo.SelectedItem as ComboBoxItem)?.Tag.ToString() ?? "Branch";
-                
-                if (selectedType == "Branch")
+                if (ReportType == "SchoolTypeSummary")
                 {
-                    FilterLabel.Text = "Filter By Branch";
+                    FilterLabel.Text = "Select School Type";
+                    IncludeAdviceNumberCheckBox.Visibility = Visibility.Collapsed;
+                    var schoolTypes = await _schoolTypeService.GetAllTypesAsync();
+                    FilterCombo.ItemsSource = schoolTypes;
+                    FilterCombo.DisplayMemberPath = "TypeName";
+                    FilterCombo.SelectedValuePath = "SchoolTypeId";
+                }
+                else if (ReportType == "BranchDetail")
+                {
+                    FilterLabel.Text = "Select Branch";
+                    IncludeAdviceNumberCheckBox.Visibility = Visibility.Visible;
                     var branches = await _branchService.GetAllBranchesAsync();
                     FilterCombo.ItemsSource = branches;
                     FilterCombo.DisplayMemberPath = "BranchName";
                     FilterCombo.SelectedValuePath = "BranchId";
                 }
-                else if (selectedType == "School")
+                else if (ReportType == "SchoolTypeDetail")
                 {
-                    FilterLabel.Text = "Filter By School";
-                    var schools = await _schoolService.GetAllSchoolsAsync();
-                    FilterCombo.ItemsSource = schools;
-                    FilterCombo.DisplayMemberPath = "SchoolName";
-                    FilterCombo.SelectedValuePath = "SchoolId";
-                }
-                else if (selectedType == "Date")
-                {
-                    FilterLabel.Text = "No Filter";
-                    FilterCombo.ItemsSource = null;
-                    FilterCombo.IsEnabled = false;
+                    FilterLabel.Text = "Select School Type";
+                    IncludeAdviceNumberCheckBox.Visibility = Visibility.Collapsed;
+                    var schoolTypes = await _schoolTypeService.GetAllTypesAsync();
+                    FilterCombo.ItemsSource = schoolTypes;
+                    FilterCombo.DisplayMemberPath = "TypeName";
+                    FilterCombo.SelectedValuePath = "SchoolTypeId";
                 }
             }
             catch (Exception ex)
@@ -76,113 +89,159 @@ namespace SchoolPayListSystem.App
         {
             try
             {
-                var reportType = (ReportTypeCombo.SelectedItem as ComboBoxItem)?.Tag.ToString() ?? "Branch";
-                var fromDate = FromDatePicker.SelectedDate ?? DateTime.Now.AddMonths(-1);
-                var toDate = ToDatePicker.SelectedDate ?? DateTime.Now;
-
-                // Ensure end date is inclusive of entire day
-                toDate = toDate.Date.AddDays(1).AddSeconds(-1);
-
-                ReportDataGrid.ItemsSource = null;
-                var reportData = new ObservableCollection<dynamic>();
-
-                var entries = await _salaryService.GetEntriesByDateRangeAsync(fromDate, toDate);
-
-                if (entries.Count == 0)
+                var loggedInUser = ((App)Application.Current).LoggedInUser;
+                if (loggedInUser == null)
                 {
-                    MessageBox.Show("No salary entries found for the selected date range.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
-                    TotalRecordsText.Text = "0";
-                    TotalAmountText.Text = "₹0.00";
+                    MessageBox.Show("No user logged in", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                if (reportType == "Branch")
-                {
-                    var branchId = FilterCombo.SelectedValue as int?;
-                    if (branchId.HasValue)
-                    {
-                        entries = entries.Where(x => x.BranchId == branchId.Value).ToList();
-                    }
+                var reportDate = ReportDatePicker.SelectedDate ?? DateTime.Now;
+                var filterId = FilterCombo.SelectedValue as int?;
 
-                    var groupedByBranch = entries.GroupBy(x => x.Branch?.BranchName ?? "Unknown");
-                    foreach (var group in groupedByBranch)
-                    {
-                        foreach (var entry in group)
-                        {
-                            dynamic row = new System.Dynamic.ExpandoObject();
-                            row.BranchName = group.Key;
-                            row.EntryDate = entry.EntryDate;
-                            row.Amount1 = entry.Amount1;
-                            row.Amount2 = entry.Amount2;
-                            row.Amount3 = entry.Amount3;
-                            row.Total = entry.TotalAmount;
-                            reportData.Add(row);
-                        }
-                    }
-                }
-                else if (reportType == "School")
+                if (!filterId.HasValue)
                 {
-                    var schoolId = FilterCombo.SelectedValue as int?;
-                    if (schoolId.HasValue)
-                    {
-                        entries = entries.Where(x => x.SchoolId == schoolId.Value).ToList();
-                    }
-
-                    var groupedBySchool = entries.GroupBy(x => x.School?.SchoolName ?? "Unknown");
-                    foreach (var group in groupedBySchool)
-                    {
-                        foreach (var entry in group)
-                        {
-                            dynamic row = new System.Dynamic.ExpandoObject();
-                            row.BranchName = group.Key;
-                            row.EntryDate = entry.EntryDate;
-                            row.Amount1 = entry.Amount1;
-                            row.Amount2 = entry.Amount2;
-                            row.Amount3 = entry.Amount3;
-                            row.Total = entry.TotalAmount;
-                            reportData.Add(row);
-                        }
-                    }
-                }
-                else if (reportType == "Date")
-                {
-                    var groupedByDate = entries.GroupBy(x => x.EntryDate.Date);
-                    foreach (var group in groupedByDate.OrderByDescending(x => x.Key))
-                    {
-                        foreach (var entry in group)
-                        {
-                            dynamic row = new System.Dynamic.ExpandoObject();
-                            row.BranchName = group.Key.ToString("dd/MM/yyyy");
-                            row.EntryDate = entry.EntryDate;
-                            row.Amount1 = entry.Amount1;
-                            row.Amount2 = entry.Amount2;
-                            row.Amount3 = entry.Amount3;
-                            row.Total = entry.TotalAmount;
-                            reportData.Add(row);
-                        }
-                    }
-                }
-
-                if (reportData.Count == 0)
-                {
-                    MessageBox.Show("No entries match the selected filter.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
-                    TotalRecordsText.Text = "0";
-                    TotalAmountText.Text = "₹0.00";
+                    MessageBox.Show($"Please select a {FilterLabel.Text.ToLower()}", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                ReportDataGrid.ItemsSource = reportData;
-                TotalRecordsText.Text = reportData.Count.ToString();
-                
-                var totalAmount = reportData.Cast<dynamic>().Sum(x => (decimal)x.Total);
-                TotalAmountText.Text = $"₹{totalAmount:F2}";
-                
-                MessageBox.Show($"Report generated successfully with {reportData.Count} records.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                if (ReportType == "SchoolTypeSummary")
+                {
+                    var report = await _reportService.GenerateSchoolTypeSummaryReportAsync(filterId.Value, loggedInUser.UserId, reportDate);
+                    
+                    if (report == null || report.Count == 0)
+                    {
+                        MessageBox.Show("No entries found for the selected school type and date.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+
+                    _currentSchoolTypeSummaryReport = report;
+                    _currentLoggedInUser = loggedInUser;
+                    _currentReportDate = reportDate;
+                    
+                    // Get school type name
+                    var schoolTypes = await _schoolTypeService.GetAllTypesAsync();
+                    var selectedSchoolType = schoolTypes.FirstOrDefault(st => st.SchoolTypeId == filterId.Value);
+                    _currentSchoolTypeName = selectedSchoolType?.TypeName ?? "Unknown";
+
+                    DisplaySchoolTypeSummaryReport(report, loggedInUser, reportDate);
+                }
+                else if (ReportType == "BranchDetail")
+                {
+                    var report = await _reportService.GenerateBranchSpecificReportAsync(filterId.Value, loggedInUser.UserId, reportDate);
+                    
+                    if (report == null || report.Entries.Count == 0)
+                    {
+                        MessageBox.Show("No entries found for the selected branch and date.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+
+                    _currentBranchDetailReport = report;
+                    _currentLoggedInUser = loggedInUser;
+                    _currentReportDate = reportDate;
+
+                    DisplayBranchDetailReport(report, loggedInUser);
+                }
+                else if (ReportType == "SchoolTypeDetail")
+                {
+                    var report = await _reportService.GenerateSchoolTypeDetailReportAsync(filterId.Value, loggedInUser.UserId, reportDate);
+                    
+                    if (report == null || report.Count == 0)
+                    {
+                        MessageBox.Show("No entries found for the selected school type and date.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
+                        return;
+                    }
+
+                    _currentSchoolTypeDetailReport = report;
+                    _currentLoggedInUser = loggedInUser;
+                    _currentReportDate = reportDate;
+
+                    // Get school type name
+                    var schoolTypes = await _schoolTypeService.GetAllTypesAsync();
+                    var selectedSchoolType = schoolTypes.FirstOrDefault(st => st.SchoolTypeId == filterId.Value);
+                    _currentSchoolTypeName = selectedSchoolType?.TypeName ?? "Unknown";
+
+                    DisplaySchoolTypeDetailReport(report);
+                }
+
+                MessageBox.Show($"Report generated successfully", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error generating report: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private void DisplaySchoolTypeSummaryReport(List<BranchReportDTO> report, User loggedInUser, DateTime reportDate)
+        {
+            var reportData = new ObservableCollection<dynamic>();
+
+            var totalAmount = 0m;
+            foreach (var branch in report)
+            {
+                foreach (var entry in branch.Entries)
+                {
+                    dynamic row = new System.Dynamic.ExpandoObject();
+                    row.BranchCode = branch.BranchCode;
+                    row.BranchName = branch.BranchName;
+                    row.Amount = entry.TotalAmount;
+                    row.AdviceNumber = entry.AdviceNumber;
+                    reportData.Add(row);
+                    totalAmount += entry.TotalAmount;
+                }
+            }
+
+            ReportDataGrid.ItemsSource = reportData;
+            TotalRecordsText.Text = reportData.Count.ToString();
+            TotalAmountText.Text = $"₹{totalAmount:F2}";
+        }
+
+        private void DisplayBranchDetailReport(BranchDetailReportDTO report, User loggedInUser)
+        {
+            var reportData = new ObservableCollection<dynamic>();
+
+            foreach (var entry in report.Entries)
+            {
+                dynamic row = new System.Dynamic.ExpandoObject();
+                row.SerialNo = entry.SerialNumber;
+                row.SchoolCode = entry.SchoolCode;
+                row.AccountNo = entry.AccountNumber;
+                row.SchoolName = entry.SchoolName;
+                row.Amount = entry.Amount;
+                row.AdviceNumber = entry.AdviceNumber;
+                reportData.Add(row);
+            }
+
+            ReportDataGrid.ItemsSource = reportData;
+            TotalRecordsText.Text = reportData.Count.ToString();
+            TotalAmountText.Text = $"₹{report.TotalAmount:F2}";
+        }
+
+        private void DisplaySchoolTypeDetailReport(List<SchoolTypeDetailReportDTO> report)
+        {
+            var reportData = new ObservableCollection<dynamic>();
+            decimal totalAmount1 = 0m, totalAmount2 = 0m, totalAmount3 = 0m;
+
+            foreach (var entry in report)
+            {
+                dynamic row = new System.Dynamic.ExpandoObject();
+                row.SerialNo = entry.SerialNumber;
+                row.SchoolCode = entry.SchoolCode;
+                row.SchoolName = entry.SchoolName;
+                row.Amount1 = entry.Amount1;
+                row.Amount2 = entry.Amount2;
+                row.Amount3 = entry.Amount3;
+                row.Total = entry.TotalAmount;
+                reportData.Add(row);
+
+                totalAmount1 += entry.Amount1;
+                totalAmount2 += entry.Amount2;
+                totalAmount3 += entry.Amount3;
+            }
+
+            ReportDataGrid.ItemsSource = reportData;
+            TotalRecordsText.Text = reportData.Count.ToString();
+            TotalAmountText.Text = $"₹{(totalAmount1 + totalAmount2 + totalAmount3):F2}";
         }
 
         private void Print_Click(object sender, RoutedEventArgs e)
@@ -218,28 +277,52 @@ namespace SchoolPayListSystem.App
                     return;
                 }
 
-                // Create a save dialog
                 var saveDialog = new Microsoft.Win32.SaveFileDialog
                 {
-                    Filter = "HTML Files (*.html)|*.html|Text Files (*.txt)|*.txt",
+                    Filter = "HTML Files (*.html)|*.html",
                     DefaultExt = ".html",
-                    FileName = $"Report_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}"
+                    FileName = $"PayReport_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}"
                 };
 
                 if (saveDialog.ShowDialog() == true)
                 {
-                    string content;
-                    if (saveDialog.FileName.EndsWith(".txt"))
+                    string htmlContent = "";
+
+                    if (ReportType == "SchoolTypeSummary" && _currentSchoolTypeSummaryReport != null)
                     {
-                        content = GenerateTextReport();
+                        htmlContent = _pdfGenerator.GenerateSchoolTypeSummaryReportHtml(
+                            _currentSchoolTypeSummaryReport,
+                            _currentSchoolTypeName,
+                            _currentReportDate,
+                            _currentLoggedInUser.FullName);
                     }
-                    else
+                    else if (ReportType == "BranchDetail" && _currentBranchDetailReport != null)
                     {
-                        content = GenerateHtmlReport();
+                        bool includeAdviceNumber = IncludeAdviceNumberCheckBox.IsChecked ?? true;
+                        htmlContent = _pdfGenerator.GenerateBranchDetailReportHtml(
+                            _currentBranchDetailReport,
+                            _currentLoggedInUser.FullName,
+                            includeAdviceNumber,
+                            1);
+                    }
+                    else if (ReportType == "SchoolTypeDetail" && _currentSchoolTypeDetailReport != null)
+                    {
+                        htmlContent = _pdfGenerator.GenerateSchoolTypeDetailReportHtml(
+                            _currentSchoolTypeDetailReport,
+                            _currentSchoolTypeName,
+                            _currentReportDate,
+                            _currentLoggedInUser.FullName,
+                            1);
                     }
 
-                    File.WriteAllText(saveDialog.FileName, content, Encoding.UTF8);
-                    MessageBox.Show($"Report exported successfully to:\n{saveDialog.FileName}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    if (!string.IsNullOrEmpty(htmlContent))
+                    {
+                        File.WriteAllText(saveDialog.FileName, htmlContent, Encoding.UTF8);
+                        MessageBox.Show($"Report exported successfully to:\n{saveDialog.FileName}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                        
+                        // Open the file in default browser
+                        System.Diagnostics.Process.Start(saveDialog.FileName);
+                    }
                 }
             }
             catch (Exception ex)
@@ -250,9 +333,8 @@ namespace SchoolPayListSystem.App
 
         private string GenerateHtmlReport()
         {
-            var reportType = (ReportTypeCombo.SelectedItem as ComboBoxItem)?.Tag.ToString() ?? "Branch";
-            var fromDate = FromDatePicker.SelectedDate?.ToString("dd/MM/yyyy") ?? "N/A";
-            var toDate = ToDatePicker.SelectedDate?.ToString("dd/MM/yyyy") ?? "N/A";
+            var reportType = ReportType;
+            var reportDate = ReportDatePicker.SelectedDate?.ToString("dd/MM/yyyy") ?? "N/A";
             
             var html = new StringBuilder();
             html.Append("<!DOCTYPE html><html><head><meta charset='UTF-8'><style>");
@@ -268,17 +350,20 @@ namespace SchoolPayListSystem.App
             html.Append(".final-total { background-color: #fff3cd; padding: 15px; margin-top: 20px; font-size: 18px; border: 2px solid #9933CC; }");
             html.Append("</style></head><body>");
 
-            html.Append($"<h1>Pay List Report - {reportType} Wise</h1>");
-            html.Append($"<p>Report Type: <strong>{reportType}</strong></p>");
-            html.Append($"<p>Date Range: <strong>{fromDate} to {toDate}</strong></p>");
+            html.Append($"<h1>Pay List Report - {reportType}</h1>");
+            html.Append($"<p>Report Date: <strong>{reportDate}</strong></p>");
 
             html.Append("<table>");
-            html.Append("<tr><th style='text-align: left;'>Branch/School</th><th>Entry Date</th><th>Amount 1</th><th>Amount 2</th><th>Amount 3</th><th>Total</th></tr>");
+            
+            if (ReportType == "SchoolTypeSummary")
+            {
+                html.Append("<tr><th style='text-align: left;'>Branch Code</th><th>Branch Name</th><th>Amount</th><th>Advice Number</th></tr>");
+            }
+            else
+            {
+                html.Append("<tr><th>Sr.No</th><th style='text-align: left;'>School Code</th><th style='text-align: left;'>Account No</th><th style='text-align: left;'>School Name</th><th>Amount</th><th>Advice Number</th></tr>");
+            }
 
-            var totalRecords = 0;
-            var totalAmount1 = 0m;
-            var totalAmount2 = 0m;
-            var totalAmount3 = 0m;
             var totalAmount = 0m;
 
             try
@@ -288,34 +373,33 @@ namespace SchoolPayListSystem.App
                     try
                     {
                         dynamic row = item;
-                        totalRecords++;
                         
-                        decimal amount1 = 0m;
-                        decimal amount2 = 0m;
-                        decimal amount3 = 0m;
-                        
-                        try { amount1 = Convert.ToDecimal(row.Amount1 ?? 0); } catch { }
-                        try { amount2 = Convert.ToDecimal(row.Amount2 ?? 0); } catch { }
-                        try { amount3 = Convert.ToDecimal(row.Amount3 ?? 0); } catch { }
-                        
-                        decimal rowTotal = amount1 + amount2 + amount3;
-                        totalAmount1 += amount1;
-                        totalAmount2 += amount2;
-                        totalAmount3 += amount3;
-                        totalAmount += rowTotal;
-                        
-                        string branchName = row.BranchName?.ToString() ?? "";
-                        DateTime entryDate = DateTime.Now;
-                        try { entryDate = (DateTime)row.EntryDate; } catch { }
-                        
-                        html.Append("<tr>");
-                        html.Append($"<td>{branchName}</td>");
-                        html.Append($"<td>{entryDate:dd/MM/yyyy}</td>");
-                        html.Append($"<td>₹{amount1:F2}</td>");
-                        html.Append($"<td>₹{amount2:F2}</td>");
-                        html.Append($"<td>₹{amount3:F2}</td>");
-                        html.Append($"<td>₹{rowTotal:F2}</td>");
-                        html.Append("</tr>");
+                        if (ReportType == "SchoolTypeSummary")
+                        {
+                            decimal amount = Convert.ToDecimal(row.Amount ?? 0);
+                            totalAmount += amount;
+                            
+                            html.Append("<tr>");
+                            html.Append($"<td>{row.BranchCode}</td>");
+                            html.Append($"<td>{row.BranchName}</td>");
+                            html.Append($"<td>₹{amount:F2}</td>");
+                            html.Append($"<td>{row.AdviceNumber}</td>");
+                            html.Append("</tr>");
+                        }
+                        else
+                        {
+                            decimal amount = Convert.ToDecimal(row.Amount ?? 0);
+                            totalAmount += amount;
+                            
+                            html.Append("<tr>");
+                            html.Append($"<td>{row.SerialNo}</td>");
+                            html.Append($"<td>{row.SchoolCode}</td>");
+                            html.Append($"<td>{row.AccountNo}</td>");
+                            html.Append($"<td>{row.SchoolName}</td>");
+                            html.Append($"<td>₹{amount:F2}</td>");
+                            html.Append($"<td>{row.AdviceNumber}</td>");
+                            html.Append("</tr>");
+                        }
                     }
                     catch (Exception rowEx)
                     {
@@ -330,115 +414,31 @@ namespace SchoolPayListSystem.App
 
             // Add totals row
             html.Append("<tr style='background-color: #e8f4f8; font-weight: bold;'>");
-            html.Append("<td>AMOUNT-WISE TOTAL</td>");
-            html.Append("<td></td>");
-            html.Append($"<td>₹{totalAmount1:F2}</td>");
-            html.Append($"<td>₹{totalAmount2:F2}</td>");
-            html.Append($"<td>₹{totalAmount3:F2}</td>");
-            html.Append($"<td>₹{totalAmount:F2}</td>");
+            if (ReportType == "SchoolTypeSummary")
+            {
+                html.Append("<td>TOTAL</td>");
+                html.Append("<td></td>");
+                html.Append($"<td>₹{totalAmount:F2}</td>");
+                html.Append("<td></td>");
+            }
+            else
+            {
+                html.Append("<td colspan='4'>BRANCH TOTAL</td>");
+                html.Append($"<td>₹{totalAmount:F2}</td>");
+                html.Append("<td></td>");
+            }
             html.Append("</tr>");
             html.Append("</table>");
 
             html.Append("<div class='summary'>");
-            html.Append("<p style='font-size: 16px; margin-bottom: 10px;'>📊 SUMMARY</p>");
-            html.Append($"<div class='summary-row'><span>Total Records:</span><strong>{totalRecords}</strong></div>");
-            html.Append($"<div class='summary-row'><span>Amount 1 Total:</span><strong>₹{totalAmount1:F2}</strong></div>");
-            html.Append($"<div class='summary-row'><span>Amount 2 Total:</span><strong>₹{totalAmount2:F2}</strong></div>");
-            html.Append($"<div class='summary-row'><span>Amount 3 Total:</span><strong>₹{totalAmount3:F2}</strong></div>");
+            html.Append($"<p style='font-size: 16px; margin-bottom: 10px;'>Total Records: {ReportDataGrid.Items.Count}</p>");
+            html.Append($"<div class='summary-row'><span>Total Amount:</span><strong>₹{totalAmount:F2}</strong></div>");
             html.Append("</div>");
 
-            html.Append($"<div class='final-total'>🎯 FINAL TOTAL: ₹{totalAmount:F2}</div>");
+            html.Append($"<div class='final-total'>Generated on: {DateTime.Now:dd/MM/yyyy HH:mm:ss}</div>");
             html.Append("</body></html>");
 
             return html.ToString();
-        }
-
-        private string GenerateTextReport()
-        {
-            var reportType = (ReportTypeCombo.SelectedItem as ComboBoxItem)?.Tag.ToString() ?? "Branch";
-            var fromDate = FromDatePicker.SelectedDate?.ToString("dd/MM/yyyy") ?? "N/A";
-            var toDate = ToDatePicker.SelectedDate?.ToString("dd/MM/yyyy") ?? "N/A";
-
-            var text = new StringBuilder();
-            text.AppendLine("================================================================================");
-            text.AppendLine("PAY LIST REPORT");
-            text.AppendLine("================================================================================");
-            text.AppendLine($"Report Type: {reportType}");
-            text.AppendLine($"Date Range: {fromDate} to {toDate}");
-            text.AppendLine($"Generated on: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
-            text.AppendLine("================================================================================");
-            text.AppendLine(string.Format("{0,-30} {1,-15} {2,-15} {3,-15} {4,-15} {5,-15}",
-                "Branch/School", "Entry Date", "Amount 1", "Amount 2", "Amount 3", "Total"));
-            text.AppendLine("================================================================================");
-
-            var totalRecords = 0;
-            var totalAmount1 = 0m;
-            var totalAmount2 = 0m;
-            var totalAmount3 = 0m;
-            var totalAmount = 0m;
-
-            try
-            {
-                foreach (var item in ReportDataGrid.Items)
-                {
-                    try
-                    {
-                        dynamic row = item;
-                        totalRecords++;
-
-                        decimal amount1 = 0m;
-                        decimal amount2 = 0m;
-                        decimal amount3 = 0m;
-                        
-                        try { amount1 = Convert.ToDecimal(row.Amount1 ?? 0); } catch { }
-                        try { amount2 = Convert.ToDecimal(row.Amount2 ?? 0); } catch { }
-                        try { amount3 = Convert.ToDecimal(row.Amount3 ?? 0); } catch { }
-                        
-                        decimal rowTotal = amount1 + amount2 + amount3;
-                        totalAmount1 += amount1;
-                        totalAmount2 += amount2;
-                        totalAmount3 += amount3;
-                        totalAmount += rowTotal;
-
-                        string branchName = row.BranchName?.ToString() ?? "";
-                        DateTime entryDate = DateTime.Now;
-                        try { entryDate = (DateTime)row.EntryDate; } catch { }
-
-                        text.AppendLine(string.Format("{0,-30} {1,-15} {2,-15:F2} {3,-15:F2} {4,-15:F2} {5,-15:F2}",
-                            branchName,
-                            entryDate.ToString("dd/MM/yyyy"),
-                            amount1,
-                            amount2,
-                            amount3,
-                            rowTotal));
-                    }
-                    catch (Exception rowEx)
-                    {
-                        MessageBox.Show($"Error processing row: {rowEx.Message}", "Row Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error processing report data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            text.AppendLine("================================================================================");
-            text.AppendLine(string.Format("{0,-30} {1,-15} {2,-15:F2} {3,-15:F2} {4,-15:F2} {5,-15:F2}",
-                "AMOUNT-WISE TOTAL", "", totalAmount1, totalAmount2, totalAmount3, totalAmount));
-            text.AppendLine("================================================================================");
-            text.AppendLine();
-            text.AppendLine("📊 SUMMARY");
-            text.AppendLine("================================================================================");
-            text.AppendLine($"Total Records: {totalRecords}");
-            text.AppendLine($"Amount 1 Total: ₹{totalAmount1:F2}");
-            text.AppendLine($"Amount 2 Total: ₹{totalAmount2:F2}");
-            text.AppendLine($"Amount 3 Total: ₹{totalAmount3:F2}");
-            text.AppendLine("================================================================================");
-            text.AppendLine($"🎯 FINAL TOTAL: ₹{totalAmount:F2}");
-            text.AppendLine("================================================================================");
-
-            return text.ToString();
         }
     }
 }

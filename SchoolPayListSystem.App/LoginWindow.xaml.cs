@@ -13,6 +13,7 @@ namespace SchoolPayListSystem.App
         private AuthenticationService _authService;
         private SchoolPayListDbContext _context;
         private UserRepository _userRepository;
+        private User _currentUser;
 
         public LoginWindow()
         {
@@ -25,7 +26,7 @@ namespace SchoolPayListSystem.App
                 _userRepository = new UserRepository(_context);
                 _authService = new AuthenticationService(_userRepository);
                 
-                // Check if this is first-time use (no users besides GCP admin)
+                // Check if this is first-time use
                 CheckFirstTimeUse();
                 
                 this.Topmost = true;
@@ -61,19 +62,16 @@ namespace SchoolPayListSystem.App
                 // If only 1 user (GCP admin) or 0, show create admin screen
                 if (userCount <= 1)
                 {
-                    // Hide login controls, show create admin message
                     MessageBlock.Text = "First-time setup required. Please create your admin account.";
                     LoginButton.Visibility = Visibility.Collapsed;
-                    ForgotPasswordButton.Visibility = Visibility.Collapsed;
-                    CreateAdminButton.Content = "CREATE ADMIN ACCOUNT";
+                    CreateUserButton.Visibility = Visibility.Collapsed;
                     CreateAdminButton.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    // Hide create admin button for subsequent logins
                     CreateAdminButton.Visibility = Visibility.Collapsed;
                     LoginButton.Visibility = Visibility.Visible;
-                    ForgotPasswordButton.Visibility = Visibility.Visible;
+                    CreateUserButton.Visibility = Visibility.Visible;
                 }
             }
             catch (Exception ex)
@@ -82,23 +80,57 @@ namespace SchoolPayListSystem.App
             }
         }
 
+        private async void UserId_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            try
+            {
+                string userId = UserIdTextBox.Text?.Trim() ?? string.Empty;
+                
+                if (string.IsNullOrEmpty(userId))
+                {
+                    UserNameTextBox.Clear();
+                    _currentUser = null;
+                    return;
+                }
+
+                var user = await _authService.GetUserByIdAsync(userId);
+                if (user != null)
+                {
+                    UserNameTextBox.Text = user.FullName;
+                    _currentUser = user;
+                    MessageBlock.Text = "";
+                }
+                else
+                {
+                    UserNameTextBox.Clear();
+                    _currentUser = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBlock.Text = $"Error: {ex.Message}";
+            }
+        }
+
         private async void LoginButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                string username = UsernameTextBox.Text ?? string.Empty;
-                string password = PasswordControl.Password ?? string.Empty;
+                string userId = UserIdTextBox.Text?.Trim() ?? string.Empty;
 
-                if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                if (string.IsNullOrWhiteSpace(userId))
                 {
-                    MessageBlock.Text = "Please enter username and password";
+                    MessageBlock.Text = "Please enter your User ID";
                     return;
                 }
 
-                var (success, message, user) = await _authService.LoginAsync(username, password);
+                var (success, message, user) = await _authService.LoginAsync(userId);
 
                 if (success)
                 {
+                    // Store logged-in user in App for access throughout the application
+                    ((App)Application.Current).LoggedInUser = user;
+                    
                     MainWindow mainWindow = new MainWindow();
                     mainWindow.Show();
                     Close();
@@ -114,45 +146,58 @@ namespace SchoolPayListSystem.App
             }
         }
 
+        private void CreateUserButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CreateAdminWindow createUserWindow = new CreateAdminWindow();
+                createUserWindow.Owner = this;
+                bool? result = createUserWindow.ShowDialog();
+                
+                if (result == true)
+                {
+                    MessageBlock.Foreground = System.Windows.Media.Brushes.Green;
+                    MessageBlock.Text = "User created successfully! Please login with your User ID.";
+                    UserIdTextBox.Clear();
+                    UserNameTextBox.Clear();
+                    
+                    // Bring login window to front and set focus
+                    this.Activate();
+                    this.Focus();
+                    UserIdTextBox.Focus();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Create User Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void CreateAdminButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 CreateAdminWindow createAdmin = new CreateAdminWindow();
+                createAdmin.Owner = this;
                 bool? result = createAdmin.ShowDialog();
                 
-                // If admin was created successfully, automatically transition to login screen
                 if (result == true)
                 {
-                    // Refresh the UI to show login screen
                     CheckFirstTimeUse();
-                    MessageBlock.Text = "Admin account created successfully! Please login with your credentials.";
+                    MessageBlock.Foreground = System.Windows.Media.Brushes.Green;
+                    MessageBlock.Text = "Admin account created successfully! Please login with your User ID.";
+                    UserIdTextBox.Clear();
+                    UserNameTextBox.Clear();
+                    
+                    // Bring login window to front and set focus
+                    this.Activate();
+                    this.Focus();
+                    UserIdTextBox.Focus();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Create Admin Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void ForgotPasswordButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                ForgotPasswordWindow forgotPassword = new ForgotPasswordWindow();
-                bool? result = forgotPassword.ShowDialog();
-                
-                if (result == true)
-                {
-                    MessageBlock.Text = "Password reset successfully! Please login with your new password.";
-                    UsernameTextBox.Clear();
-                    PasswordControl.Clear();
-                    UsernameTextBox.Focus();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Forgot Password Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

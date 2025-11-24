@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Windows;
+using SchoolPayListSystem.Core.Models;
 using SchoolPayListSystem.Data.Database;
 using SQLitePCL;
 
@@ -8,6 +9,11 @@ namespace SchoolPayListSystem.App
 {
     public partial class App : Application
     {
+        /// <summary>
+        /// Currently logged-in user - accessible throughout the application
+        /// </summary>
+        public User LoggedInUser { get; set; }
+
         static App()
         {
             // Initialize SQLite FIRST - before anything else
@@ -34,19 +40,9 @@ namespace SchoolPayListSystem.App
                 var context = new SchoolPayListDbContext();
                 int userCount = context.Users.Count();
                 
-                // If only GCP admin (1 user), show Create Admin window first
-                if (userCount <= 1)
-                {
-                    // Open Create Admin window instead of Login
-                    CreateAdminWindow createAdminWindow = new CreateAdminWindow();
-                    createAdminWindow.Show();
-                }
-                else
-                {
-                    // Open Login window for subsequent uses
-                    LoginWindow loginWindow = new LoginWindow();
-                    loginWindow.Show();
-                }
+                // If only GCP admin (1 user), show Login window (will prompt for create admin if needed)
+                LoginWindow loginWindow = new LoginWindow();
+                loginWindow.Show();
             }
             catch (Exception ex)
             {

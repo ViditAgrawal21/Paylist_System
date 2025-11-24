@@ -12,6 +12,7 @@ namespace SchoolPayListSystem.Core.DTOs
         public decimal Amount2 { get; set; }
         public decimal Amount3 { get; set; }
         public decimal TotalAmount { get; set; }
+        public string AdviceNumber { get; set; }
     }
 
     public class BranchReportDTO

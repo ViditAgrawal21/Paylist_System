@@ -33,18 +33,26 @@
                 CornerRadius="8">
             <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0">
                 <StackPanel Margin="40">
-                    <!-- Username Section -->
-                    <TextBlock Text="Username" FontSize="12" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
-                    <TextBox x:Name="UsernameTextBox" Height="45" Padding="12,0" FontSize="13" 
-                             Margin="0,0,0,20" 
+                    <!-- User ID Section -->
+                    <TextBlock Text="User ID" FontSize="12" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
+                    <TextBox x:Name="UserIdTextBox" Height="45" Padding="12,0" FontSize="13" 
+                             Margin="0,0,0,10" 
                              Background="#F5F5F5" 
                              BorderThickness="1" 
                              BorderBrush="#CCCCCC"
-                             VerticalContentAlignment="Center"/>
+                             VerticalContentAlignment="Center"
+                             TextChanged="UserId_TextChanged"/>
 
-                    <!-- Password Section with Eye Toggle -->
-                    <TextBlock Text="Password" FontSize="12" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
-                    <local:PasswordBoxWithToggle x:Name="PasswordControl" Margin="0,0,0,25"/>
+                    <!-- User Name Section (Auto-populated, Read-only) -->
+                    <TextBlock Text="User Name" FontSize="12" FontWeight="Bold" Foreground="#333333" Margin="0,0,0,8"/>
+                    <TextBox x:Name="UserNameTextBox" Height="45" Padding="12,0" FontSize="13" 
+                             Margin="0,0,0,20" 
+                             Background="#F0F0F0" 
+                             BorderThickness="1" 
+                             BorderBrush="#CCCCCC"
+                             VerticalContentAlignment="Center"
+                             IsReadOnly="True"
+                             Foreground="#666666"/>
 
                     <!-- Error Message -->
                     <TextBlock x:Name="MessageBlock" Text="" Foreground="#CC0000" FontSize="11" TextWrapping="Wrap" 
@@ -63,30 +71,31 @@
                             Cursor="Hand"
                             BorderThickness="0"/>
 
-                    <!-- Forgot Password Button -->
-                    <Button x:Name="ForgotPasswordButton"
-                            Content="FORGOT PASSWORD?" 
+                    <!-- Create User Button -->
+                    <Button x:Name="CreateUserButton"
+                            Content="CREATE NEW USER" 
                             Height="40" 
-                            Background="#FF9800" 
+                            Background="#00AA00" 
                             Foreground="White" 
                             FontSize="11"
                             FontWeight="Bold"
-                            Click="ForgotPasswordButton_Click"
+                            Click="CreateUserButton_Click"
                             Margin="0,0,0,12"
                             Cursor="Hand"
                             BorderThickness="0"/>
                     
-                    <!-- Create Admin Button -->
+                    <!-- Create Admin Button (Hidden after first user) -->
                     <Button x:Name="CreateAdminButton" 
                             Content="CREATE ADMIN ACCOUNT (FIRST TIME)" 
                             Height="50" 
-                            Background="#00AA00" 
+                            Background="#FF6600" 
                             Foreground="White" 
                             FontSize="11"
                             FontWeight="Bold"
                             Click="CreateAdminButton_Click"
                             Cursor="Hand"
-                            BorderThickness="0"/>
+                            BorderThickness="0"
+                            Visibility="Collapsed"/>
                 </StackPanel>
             </ScrollViewer>
         </Border>
