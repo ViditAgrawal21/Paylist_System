@@ -1,8 +1,17 @@
 <Window x:Class="SchoolPayListSystem.App.ReportWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Professional Bank Reports" Height="700" Width="1000"
-        WindowStartupLocation="CenterScreen">
+        Title="Professional Bank Reports" Height="700" Width="1200"
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded">
+    <Window.Resources>
+        <Style TargetType="DataGrid">
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="White"/>
+            <Setter Property="AlternatingRowBackground" Value="#F5F5F5"/>
+        </Style>
+    </Window.Resources>
     <Grid>
         <DockPanel>
             <!-- Header -->
@@ -14,30 +23,51 @@
 
             <!-- Filter Section -->
             <StackPanel DockPanel.Dock="Top" Margin="20" Background="#F9F9F9">
-                <StackPanel Orientation="Horizontal" Margin="15,15,15,15">
-                    <TextBlock x:Name="FilterLabel" Text="Select Filter" Width="150" VerticalAlignment="Center" FontWeight="Bold"/>
-                    <ComboBox x:Name="FilterCombo" Width="250" Padding="10" Margin="10,0,0,0"/>
-                    <TextBlock Text="Report Date" Width="100" VerticalAlignment="Center" FontWeight="Bold" Margin="30,0,0,0"/>
-                    <DatePicker x:Name="ReportDatePicker" Width="150" Margin="10,0,0,0"/>
+                <!-- Report Type Selection -->
+                <StackPanel Orientation="Horizontal" Margin="15,15,15,10">
+                    <TextBlock Text="Report Type:" Width="100" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <RadioButton x:Name="ReportTypeToday" Content="Today" GroupName="ReportType" IsChecked="True" VerticalAlignment="Center" Margin="10,0,20,0" Checked="ReportType_Changed"/>
+                    <RadioButton x:Name="ReportTypeDateRange" Content="Date Range" GroupName="ReportType" VerticalAlignment="Center" Margin="0,0,20,0" Checked="ReportType_Changed"/>
+                    <RadioButton x:Name="ReportTypeAllTime" Content="All-Time" GroupName="ReportType" VerticalAlignment="Center" Checked="ReportType_Changed"/>
+                </StackPanel>
+
+                <!-- Filter and Date Selection -->
+                <StackPanel Orientation="Horizontal" Margin="15,10,15,15">
+                    <TextBlock x:Name="FilterLabel" Text="Select Filter" Width="120" VerticalAlignment="Center" FontWeight="Bold"/>
+                    <ComboBox x:Name="FilterCombo" Width="200" Padding="10" Margin="10,0,0,0" SelectionChanged="FilterCombo_SelectionChanged"/>
+                    
+                    <TextBlock x:Name="FilterLabel2" Text="Select School Type" Width="130" VerticalAlignment="Center" FontWeight="Bold" Margin="15,0,0,0" Visibility="Collapsed"/>
+                    <ComboBox x:Name="FilterCombo2" Width="180" Padding="10" Margin="10,0,0,0" Visibility="Collapsed"/>
+                    
+                    <TextBlock x:Name="ReportDateLabel" Text="Report Date" Width="80" VerticalAlignment="Center" FontWeight="Bold" Margin="15,0,0,0"/>
+                    <DatePicker x:Name="ReportDatePicker" Width="130" Margin="10,0,0,0"/>
+                    
+                    <TextBlock x:Name="StartDateLabel" Text="Start Date" Width="100" VerticalAlignment="Center" FontWeight="Bold" Margin="30,0,0,0" Visibility="Collapsed"/>
+                    <DatePicker x:Name="StartDatePicker" Width="150" Margin="10,0,0,0" Visibility="Collapsed"/>
+                    
+                    <TextBlock x:Name="EndDateLabel" Text="End Date" Width="100" VerticalAlignment="Center" FontWeight="Bold" Margin="15,0,0,0" Visibility="Collapsed"/>
+                    <DatePicker x:Name="EndDatePicker" Width="150" Margin="10,0,0,0" Visibility="Collapsed"/>
+                    
                     <Button Content="Generate Report" Width="140" Height="40" Background="#00AA00" Foreground="White" Click="GenerateReport_Click" Margin="20,0,0,0" FontWeight="Bold"/>
                 </StackPanel>
 
+                <!-- Additional Options (Advice Number Toggle) -->
+                <StackPanel Orientation="Horizontal" Margin="15,0,15,15" x:Name="AdviceNumberTogglePanel" Visibility="Collapsed">
+                    <CheckBox x:Name="IncludeAdviceNumberCheckBox" Content="Include Advice Number" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,20,0" IsChecked="True"/>
+                </StackPanel>
+
                 <StackPanel Orientation="Horizontal" Margin="15,0,15,15">
-                    <CheckBox x:Name="IncludeAdviceNumberCheckBox" Content="Include Advice Number?" VerticalAlignment="Center" Margin="0,0,20,0" IsChecked="True" Visibility="Collapsed"/>
                     <Button Content="Print" Width="100" Height="40" Background="#0066CC" Foreground="White" Click="Print_Click" Margin="0,0,10,0" FontWeight="Bold"/>
                     <Button Content="Export PDF/HTML" Width="140" Height="40" Background="#FF6600" Foreground="White" Click="ExportPDF_Click" FontWeight="Bold"/>
                 </StackPanel>
             </StackPanel>
 
-            <!-- Report Data Grid -->
-            <DataGrid x:Name="ReportDataGrid" DockPanel.Dock="Top" AutoGenerateColumns="False" Margin="20,10,20,20">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Column 1" Binding="{Binding Col1}" Width="150" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Column 2" Binding="{Binding Col2}" Width="150" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Column 3" Binding="{Binding Col3}" Width="150" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Column 4" Binding="{Binding Col4}" Width="*" IsReadOnly="True" Foreground="#00AA00" FontWeight="Bold"/>
-                </DataGrid.Columns>
-            </DataGrid>
+            <!-- Advice Number Display for Branch-wise Report -->
+            <TextBlock x:Name="AdviceNumberDisplay" Text="" Margin="20,0,0,10" FontSize="14" FontWeight="Bold" Foreground="#9933CC" Visibility="Collapsed"/>
+
+            <!-- Report Status Message -->
+            <TextBlock x:Name="ReportStatusText" DockPanel.Dock="Top" Text="Generate a report to see details here" Margin="20,20,20,10" FontSize="13" Foreground="#333333" TextWrapping="Wrap"/>
+
 
             <!-- Summary Section -->
             <StackPanel DockPanel.Dock="Bottom" Margin="20" Background="#F0F0F0">

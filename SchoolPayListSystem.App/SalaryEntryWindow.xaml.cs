@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using SchoolPayListSystem.Core;
+using SchoolPayListSystem.Core.DTOs;
 using SchoolPayListSystem.Core.Models;
 using SchoolPayListSystem.Data;
 using SchoolPayListSystem.Data.Database;
@@ -19,7 +20,8 @@ namespace SchoolPayListSystem.App
         private readonly SchoolService _schoolService;
         private readonly BranchService _branchService;
         private readonly SchoolTypeService _schoolTypeService;
-        private System.Collections.ObjectModel.ObservableCollection<SchoolPayListSystem.Core.Models.SalaryEntry> _entries;
+        private System.Collections.ObjectModel.ObservableCollection<FreshSalaryEntryDTO> _entries;  // Now stores FreshSalaryEntryDTO
+        private System.Collections.ObjectModel.ObservableCollection<ImportedSalaryEntrySummaryDTO> _importedEntries;
         private System.Collections.ObjectModel.ObservableCollection<SchoolPayListSystem.Core.Models.School> _schools = new();
         private int _currentIndex = -1;
         private bool _isNewRecord = true;
@@ -41,8 +43,11 @@ namespace SchoolPayListSystem.App
             _schoolTypeService = new SchoolTypeService(schoolTypeRepository);
             _salaryService = new SalaryService(salaryRepository);
             
-            _entries = new System.Collections.ObjectModel.ObservableCollection<SchoolPayListSystem.Core.Models.SalaryEntry>();
-            EntriesDataGrid.ItemsSource = _entries;
+            // Initialize collections - fresh entries in main grid
+            _entries = new System.Collections.ObjectModel.ObservableCollection<FreshSalaryEntryDTO>();
+            _importedEntries = new System.Collections.ObjectModel.ObservableCollection<ImportedSalaryEntrySummaryDTO>();
+            FreshEntriesDataGrid.ItemsSource = _entries;
+            // ImportedEntriesDataGrid hidden from UI - no longer bound
             
             Loaded += async (s, e) => await LoadData();
         }
@@ -66,13 +71,16 @@ namespace SchoolPayListSystem.App
                 await LoadBranches();
                 await LoadSchoolTypes();
                 
-                // Load only current operator's entries
-                var currentUserEntries = await _salaryService.GetEntriesByOperatorAsync(app.LoggedInUser?.UserId ?? 0);
+                // Load fresh entries (full details)
+                var freshEntries = await _salaryService.GetFreshEntriesForDisplayAsync(app.LoggedInUser?.UserId ?? 0);
                 _entries.Clear();
-                foreach (var entry in currentUserEntries.OrderByDescending(x => x.EntryDate))
+                foreach (var entry in freshEntries)
                 {
                     _entries.Add(entry);
                 }
+
+                // Imported entries are stored in database but not displayed in UI
+                // No need to load ImportedEntriesSummary for display
                 
                 ClearForm();
             }
@@ -115,11 +123,20 @@ namespace SchoolPayListSystem.App
         {
             try
             {
+                var app = (App)Application.Current;
                 _entries.Clear();
-                var entries = await _salaryService.GetAllEntriesAsync();
-                foreach (var entry in entries.OrderByDescending(x => x.EntryDate))
+                var freshEntries = await _salaryService.GetFreshEntriesForDisplayAsync(app.LoggedInUser?.UserId ?? 0);
+                foreach (var entry in freshEntries)
                 {
                     _entries.Add(entry);
+                }
+                
+                // Also reload imported entries
+                var importedEntries = await _salaryService.GetImportedEntriesSummaryAsync(app.LoggedInUser?.UserId ?? 0);
+                _importedEntries.Clear();
+                foreach (var entry in importedEntries)
+                {
+                    _importedEntries.Add(entry);
                 }
             }
             catch (Exception ex)
@@ -135,16 +152,24 @@ namespace SchoolPayListSystem.App
 
         private void CalculateTotal()
         {
-            decimal amount1 = decimal.TryParse(Amount1TextBox.Text, out var a1) ? a1 : 0;
-            decimal amount2 = decimal.TryParse(Amount2TextBox.Text, out var a2) ? a2 : 0;
-            decimal amount3 = decimal.TryParse(Amount3TextBox.Text, out var a3) ? a3 : 0;
+            var amount1TextBox = this.FindName("Amount1TextBox") as TextBox;
+            var amount2TextBox = this.FindName("Amount2TextBox") as TextBox;
+            var amount3TextBox = this.FindName("Amount3TextBox") as TextBox;
+            var amount1Display = this.FindName("Amount1Display") as TextBlock;
+            var amount2Display = this.FindName("Amount2Display") as TextBlock;
+            var amount3Display = this.FindName("Amount3Display") as TextBlock;
+            var totalAmountDisplay = this.FindName("TotalAmountDisplay") as TextBlock;
+
+            decimal amount1 = amount1TextBox != null && decimal.TryParse(amount1TextBox.Text, out var a1) ? a1 : 0;
+            decimal amount2 = amount2TextBox != null && decimal.TryParse(amount2TextBox.Text, out var a2) ? a2 : 0;
+            decimal amount3 = amount3TextBox != null && decimal.TryParse(amount3TextBox.Text, out var a3) ? a3 : 0;
             
             decimal total = amount1 + amount2 + amount3;
             
-            Amount1Display.Text = $"₹{amount1:F2}";
-            Amount2Display.Text = $"₹{amount2:F2}";
-            Amount3Display.Text = $"₹{amount3:F2}";
-            TotalAmountDisplay.Text = $"₹{total:F2}";
+            if (amount1Display != null) amount1Display.Text = $"₹{amount1:F2}";
+            if (amount2Display != null) amount2Display.Text = $"₹{amount2:F2}";
+            if (amount3Display != null) amount3Display.Text = $"₹{amount3:F2}";
+            if (totalAmountDisplay != null) totalAmountDisplay.Text = $"₹{total:F2}";
         }
 
         private void ClearForm()
@@ -193,15 +218,16 @@ namespace SchoolPayListSystem.App
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(SchoolCodeTextBox.Text) || 
-                    string.IsNullOrWhiteSpace(Amount1TextBox.Text))
+                var schoolCodeTextBox = this.FindName("SchoolCodeTextBox") as TextBox;
+
+                if (schoolCodeTextBox == null || string.IsNullOrWhiteSpace(schoolCodeTextBox.Text))
                 {
-                    MessageBox.Show("Please enter school code and Amount 1.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show("Please enter school code.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 // Find school by code
-                var schoolCode = SchoolCodeTextBox.Text.Trim();
+                var schoolCode = schoolCodeTextBox.Text.Trim();
                 var selectedSchool = _schools.FirstOrDefault(s => s.SchoolCode == schoolCode);
                 
                 if (selectedSchool == null)
@@ -210,9 +236,14 @@ namespace SchoolPayListSystem.App
                     return;
                 }
 
-                decimal amount1 = decimal.Parse(Amount1TextBox.Text);
-                decimal amount2 = decimal.Parse(Amount2TextBox.Text ?? "0");
-                decimal amount3 = decimal.Parse(Amount3TextBox.Text ?? "0");
+                var amount1TextBox = this.FindName("Amount1TextBox") as TextBox;
+                var amount2TextBox = this.FindName("Amount2TextBox") as TextBox;
+                var amount3TextBox = this.FindName("Amount3TextBox") as TextBox;
+
+                // Parse amounts - allow empty values (default to 0)
+                decimal amount1 = string.IsNullOrWhiteSpace(amount1TextBox?.Text) ? 0 : decimal.Parse(amount1TextBox.Text);
+                decimal amount2 = string.IsNullOrWhiteSpace(amount2TextBox?.Text) ? 0 : decimal.Parse(amount2TextBox.Text);
+                decimal amount3 = string.IsNullOrWhiteSpace(amount3TextBox?.Text) ? 0 : decimal.Parse(amount3TextBox.Text);
 
                 // Get logged-in user
                 var app = (App)Application.Current;
@@ -316,26 +347,23 @@ namespace SchoolPayListSystem.App
                 _isNewRecord = false;
                 _isEditMode = false;
 
-                // Find and populate the school
-                var school = _schools.FirstOrDefault(s => s.SchoolId == entry.SchoolId);
-                if (school != null)
-                {
-                    var schoolCodeTextBox = this.FindName("SchoolCodeTextBox") as TextBox;
-                    if (schoolCodeTextBox != null) schoolCodeTextBox.Text = school.SchoolCode;
-                    
-                    SchoolCode_TextChanged(null, null);
-                }
+                // Set school code and name directly from the entry DTO
+                var schoolCodeTextBox = this.FindName("SchoolCodeTextBox") as TextBox;
+                if (schoolCodeTextBox != null) schoolCodeTextBox.Text = entry.SchoolCode;
+
+                var schoolNameTextBox = this.FindName("SchoolNameTextBox") as TextBox;
+                if (schoolNameTextBox != null) schoolNameTextBox.Text = entry.SchoolName;
 
                 var entryDatePicker = this.FindName("EntryDatePicker") as DatePicker;
-                if (entryDatePicker != null) entryDatePicker.SelectedDate = entry.EntryDate;
+                if (entryDatePicker != null) entryDatePicker.SelectedDate = entry.INDATE;
 
                 var amount1TextBox = this.FindName("Amount1TextBox") as TextBox;
                 var amount2TextBox = this.FindName("Amount2TextBox") as TextBox;
                 var amount3TextBox = this.FindName("Amount3TextBox") as TextBox;
 
-                if (amount1TextBox != null) amount1TextBox.Text = entry.Amount1.ToString("F2");
-                if (amount2TextBox != null) amount2TextBox.Text = entry.Amount2.ToString("F2");
-                if (amount3TextBox != null) amount3TextBox.Text = entry.Amount3.ToString("F2");
+                if (amount1TextBox != null) amount1TextBox.Text = entry.AMOUNT1.ToString("F2");
+                if (amount2TextBox != null) amount2TextBox.Text = entry.AMOUNT2.ToString("F2");
+                if (amount3TextBox != null) amount3TextBox.Text = entry.AMOUNT2.ToString("F2");
                 
                 CalculateTotal();
 
@@ -345,8 +373,7 @@ namespace SchoolPayListSystem.App
                 if (amount3TextBox != null) amount3TextBox.IsReadOnly = true;
 
                 // Disable other fields when viewing
-                var schoolCodeTextBoxDisable = this.FindName("SchoolCodeTextBox") as TextBox;
-                if (schoolCodeTextBoxDisable != null) schoolCodeTextBoxDisable.IsEnabled = false;
+                if (schoolCodeTextBox != null) schoolCodeTextBox.IsEnabled = false;
                 if (entryDatePicker != null) entryDatePicker.IsEnabled = false;
 
                 // Enable Edit button
@@ -354,7 +381,7 @@ namespace SchoolPayListSystem.App
                 if (editButton != null) editButton.IsEnabled = true;
 
                 // Highlight the current entry in the grid
-                var entriesDataGrid = this.FindName("EntriesDataGrid") as DataGrid;
+                var entriesDataGrid = this.FindName("FreshEntriesDataGrid") as DataGrid;
                 if (entriesDataGrid != null)
                 {
                     entriesDataGrid.SelectedIndex = index;
@@ -381,8 +408,8 @@ namespace SchoolPayListSystem.App
                 
                 var result = MessageBox.Show(
                     $"Are you sure you want to delete this salary entry?\n\n" +
-                    $"Date: {entry.EntryDate:dd/MM/yyyy}\n" +
-                    $"Amount: ₹{entry.TotalAmount:F2}",
+                    $"Date: {entry.INDATE:dd/MM/yyyy}\n" +
+                    $"Amount: ₹{entry.AMOUNT:F2}",
                     "Confirm Delete",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);

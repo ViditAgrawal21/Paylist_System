@@ -58,6 +58,17 @@
                     </StackPanel>
                 </Border>
 
+                <!-- Export Data Section (GCP Admin) -->
+                <Border Name="ExportDataSection" BorderThickness="1" BorderBrush="#DDDDDD" Background="White" Padding="25" Margin="0,0,0,20" CornerRadius="8" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="EXPORT &amp; ADMIN" FontSize="14" FontWeight="Bold" Foreground="#FF6B6B" Margin="0,0,0,20"/>
+                        <TextBlock Text="Export and manage system data" FontSize="11" Foreground="#666666" Margin="0,0,0,15"/>
+                        <WrapPanel>
+                            <Button Content="View Export Summary" Height="55" Width="200" Margin="0,0,15,15" Click="ExportData_Click" FontSize="12" FontWeight="Bold" Background="#FF6B6B" Foreground="White" Cursor="Hand" Padding="10"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+
                 <!-- Utilities Section -->
                 <Border BorderThickness="1" BorderBrush="#DDDDDD" Background="White" Padding="25" Margin="0,0,0,20" CornerRadius="8">
                     <StackPanel>

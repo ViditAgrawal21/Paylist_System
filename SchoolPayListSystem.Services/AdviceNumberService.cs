@@ -6,8 +6,9 @@ namespace SchoolPayListSystem.Services
 {
     /// <summary>
     /// Service for generating unique advice numbers in format YYMMDDXXXXX
-    /// where YYMMDD is the date and XXXXX is a branch-specific daily resetting serial number
-    /// Each branch gets its own unique advice number sequence per day
+    /// where YYMMDD is the date and XXXXX is a sequential number
+    /// Advice numbers are sequential per school type per day
+    /// Each school type starts its own sequence (High School: 01-10, Primary: 11-20, etc.)
     /// </summary>
     public class AdviceNumberService
     {
@@ -20,37 +21,41 @@ namespace SchoolPayListSystem.Services
 
         /// <summary>
         /// Generates a new advice number for the given branch and date
-        /// Format: DDMMYY + 2-digit serial (e.g., 26112501 for 26-Nov-2025 with serial 01)
-        /// Serial number resets daily and is unique per branch (all schools in same branch get same advice number)
+        /// Format: YYMMDD + 2-digit serial (e.g., 25110501 for 05-Nov-2025 with serial 01)
+        /// Per-Branch Sequential Numbering:
+        /// - Advice numbers are sequential PER BRANCH per day
+        /// - All school types within a branch share the same number sequence
+        /// - Branch1 entries (any school type) = 01-99, Branch2 entries (any school type) = 01-99, etc.
+        /// - Each entry gets a UNIQUE advice number per branch per day
         /// </summary>
-        public string GenerateAdviceNumber(DateTime date, int branchId)
+        public string GenerateAdviceNumber(DateTime date, int branchId, int schoolTypeId)
         {
             try
             {
-                // Format: DDMMYY (today: 261125 for 26-Nov-2025)
-                string datePrefix = date.ToString("ddMMyy");
+                // Format: YYMMDD (today: 251128 for 28-Nov-2025)
+                string datePrefix = date.ToString("yyMMdd");
 
-                // Get all advice numbers for this branch today
                 var todayStart = date.Date;
                 var todayEnd = todayStart.AddDays(1);
 
-                var todayAdviceNumbers = _context.SalaryEntries
-                    .Where(se => se.BranchId == branchId 
-                        && se.EntryDate >= todayStart 
-                        && se.EntryDate < todayEnd 
+                // Get ALL advice numbers for THIS BRANCH TODAY (across all school types)
+                var branchTodayAdviceNumbers = _context.SalaryEntries
+                    .Where(se => se.BranchId == branchId
+                        && se.EntryDate >= todayStart
+                        && se.EntryDate < todayEnd
                         && se.AdviceNumber != null
                         && se.AdviceNumber != "")
                     .Select(se => se.AdviceNumber)
                     .Distinct()
                     .ToList();
 
-                // Extract serial numbers from today's advice numbers for this branch
+                // Find the highest serial number used for THIS BRANCH TODAY
                 int maxSerial = 0;
-                foreach (var adviceNo in todayAdviceNumbers)
+                foreach (var adviceNo in branchTodayAdviceNumbers)
                 {
-                    if (adviceNo.Length >= 8)
+                    if (adviceNo.Length >= 8 && adviceNo.StartsWith(datePrefix))
                     {
-                        string serialPart = adviceNo.Substring(6); // Get last 2 digits (serial)
+                        string serialPart = adviceNo.Substring(6); // Get last 2 digits
                         if (int.TryParse(serialPart, out int serial))
                         {
                             if (serial > maxSerial)
@@ -59,20 +64,16 @@ namespace SchoolPayListSystem.Services
                     }
                 }
 
-                // If there are already entries for this branch today, return the same advice number
-                if (maxSerial > 0)
+                // Next serial number is unique for this branch today
+                int nextSerial = maxSerial + 1;
+                
+                // Ensure serial is within 2 digits (01-99)
+                if (nextSerial > 99)
                 {
-                    // Return the existing advice number for this branch (shared among all schools in branch)
-                    string existingAdviceNumber = datePrefix + maxSerial.ToString("D2");
-                    return existingAdviceNumber;
+                    nextSerial = 1; // Reset if we somehow exceed 99
                 }
 
-                // First entry for this branch today - create new advice number with serial 01
-                int nextSerial = 1;
-
-                // Format: DDMMYY + 2-digit serial (e.g., 26112501)
                 string adviceNumber = datePrefix + nextSerial.ToString("D2");
-
                 return adviceNumber;
             }
             catch (Exception)
@@ -84,9 +85,53 @@ namespace SchoolPayListSystem.Services
         }
 
         /// <summary>
-        /// Gets the next serial number for the given branch and date (without generating)
+        /// Gets the next serial number for the given branch and date (per-branch unique)
         /// </summary>
-        public int GetNextSerialNumber(DateTime date, int branchId)
+        public int GetNextSerialNumber(DateTime date, int branchId, int schoolTypeId)
+        {
+            try
+            {
+                var todayStart = date.Date;
+                var todayEnd = todayStart.AddDays(1);
+
+                // Get ALL advice numbers for THIS BRANCH TODAY (across all school types)
+                var branchTodayAdviceNumbers = _context.SalaryEntries
+                    .Where(se => se.BranchId == branchId
+                        && se.EntryDate >= todayStart
+                        && se.EntryDate < todayEnd
+                        && se.AdviceNumber != null)
+                    .Select(se => se.AdviceNumber)
+                    .Distinct()
+                    .ToList();
+
+                int maxSerial = 0;
+                string datePrefix = date.ToString("ddMMyy");
+                foreach (var adviceNo in branchTodayAdviceNumbers)
+                {
+                    if (adviceNo.Length >= 8 && adviceNo.StartsWith(datePrefix))
+                    {
+                        string serialPart = adviceNo.Substring(6);
+                        if (int.TryParse(serialPart, out int serial))
+                        {
+                            if (serial > maxSerial)
+                                maxSerial = serial;
+                        }
+                    }
+                }
+
+                return maxSerial + 1;
+            }
+            catch
+            {
+                return 1;
+            }
+        }
+
+        /// <summary>
+        /// Legacy method - Gets the next serial number for the given school type and date (without generating)
+        /// </summary>
+        [Obsolete("Use GetNextSerialNumber(DateTime date, int branchId, int schoolTypeId) instead")]
+        public int GetNextSerialNumber(DateTime date, int schoolTypeId)
         {
             try
             {
@@ -94,11 +139,12 @@ namespace SchoolPayListSystem.Services
                 var todayEnd = todayStart.AddDays(1);
 
                 var todayAdviceNumbers = _context.SalaryEntries
-                    .Where(se => se.BranchId == branchId 
-                        && se.EntryDate >= todayStart 
-                        && se.EntryDate < todayEnd 
-                        && se.AdviceNumber != null)
-                    .Select(se => se.AdviceNumber)
+                    .Join(_context.Schools, se => se.SchoolId, s => s.SchoolId, (se, s) => new { se, s })
+                    .Where(x => x.s.SchoolTypeId == schoolTypeId
+                        && x.se.EntryDate >= todayStart
+                        && x.se.EntryDate < todayEnd
+                        && x.se.AdviceNumber != null)
+                    .Select(x => x.se.AdviceNumber)
                     .Distinct()
                     .ToList();
 
@@ -126,10 +172,10 @@ namespace SchoolPayListSystem.Services
 
         /// <summary>
         /// Legacy method - kept for backward compatibility
-        /// Generates a global advice number without branch filtering
+        /// Generates advice number for branch (uses old method signature)
         /// </summary>
-        [Obsolete("Use GenerateAdviceNumber(DateTime date, int branchId) instead")]
-        public string GenerateAdviceNumber(DateTime date)
+        [Obsolete("Use GenerateAdviceNumber(DateTime date, int branchId, int schoolTypeId) instead")]
+        public string GenerateAdviceNumber(DateTime date, int branchId)
         {
             try
             {

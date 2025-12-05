@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SchoolPayListSystem.Services")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b5bdb6783d6edc06daa80a715f34e7564d4745db")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9ce528a9655eff87db6bafb27ae84f0b7076eb93")]
 [assembly: System.Reflection.AssemblyProductAttribute("SchoolPayListSystem.Services")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SchoolPayListSystem.Services")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

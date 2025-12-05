@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SchoolPayListSystem.Core.DTOs;
 
 namespace SchoolPayListSystem.Reports
@@ -62,12 +63,11 @@ namespace SchoolPayListSystem.Reports
                 // Data Rows
                 foreach (var branch in branchReports)
                 {
-                    var firstEntry = branch.Entries.Count > 0 ? branch.Entries[0] : null;
                     html.AppendLine("<tr>");
                     html.AppendLine($"<td>{branch.BranchCode}</td>");
                     html.AppendLine($"<td>{branch.BranchName}</td>");
                     html.AppendLine($"<td class=\"amount-right\">{branch.TotalAmount:N2}</td>");
-                    html.AppendLine($"<td class=\"amount-right\">{firstEntry?.AdviceNumber ?? ""}</td>");
+                    html.AppendLine($"<td class=\"amount-right\">{branch.AdviceNumber ?? ""}</td>");
                     html.AppendLine("</tr>");
 
                     grandTotal += branch.TotalAmount;
@@ -139,7 +139,6 @@ namespace SchoolPayListSystem.Reports
                 html.AppendLine($"<div class=\"header\">{BankName}</div>");
                 html.AppendLine($"<div class=\"header\">TO BRANCH: {branchReport.BranchCode} {branchReport.BranchName}</div>");
                 html.AppendLine($"<div class=\"subheader\">");
-                html.AppendLine($"Advice No.: {(branchReport.Entries.Count > 0 ? branchReport.Entries[0].AdviceNumber : "N/A")} &nbsp;&nbsp;&nbsp;&nbsp; ");
                 html.AppendLine($"Posting Date: {branchReport.EntryDate:dd/MM/yyyy} &nbsp;&nbsp;&nbsp;&nbsp; Page No. {pageNumber}");
                 html.AppendLine($"<br/>Please Note that your A/c has been CREDITED/DEBIT totay as below");
                 html.AppendLine("</div>");
@@ -150,8 +149,9 @@ namespace SchoolPayListSystem.Reports
                 html.AppendLine("<th style=\"width: 8%;\">Sr. No.</th>");
                 html.AppendLine("<th style=\"width: 8%;\">SCH CODE</th>");
                 html.AppendLine("<th style=\"width: 15%;\">ACCOUNT NO.</th>");
-                html.AppendLine("<th style=\"width: 50%;\">SCHOOL/COLLEGE NAME</th>");
-                html.AppendLine("<th style=\"width: 19%;\" class=\"amount-right\">AMOUNT</th>");
+                html.AppendLine("<th style=\"width: 38%;\">SCHOOL/COLLEGE NAME</th>");
+                html.AppendLine("<th style=\"width: 15%;\" class=\"amount-right\">ADVICE NO.</th>");
+                html.AppendLine("<th style=\"width: 16%;\" class=\"amount-right\">AMOUNT</th>");
                 html.AppendLine("</tr>");
 
                 // Data Rows
@@ -162,6 +162,7 @@ namespace SchoolPayListSystem.Reports
                     html.AppendLine($"<td>{entry.SchoolCode}</td>");
                     html.AppendLine($"<td>{entry.AccountNumber}</td>");
                     html.AppendLine($"<td>{entry.SchoolName}</td>");
+                    html.AppendLine($"<td class=\"amount-right\">{entry.AdviceNumber}</td>");
                     html.AppendLine($"<td class=\"amount-right\">{entry.Amount:N2}</td>");
                     html.AppendLine("</tr>");
                 }
@@ -169,7 +170,7 @@ namespace SchoolPayListSystem.Reports
                 // Total Row
                 html.AppendLine("<tr class=\"total-row\">");
                 html.AppendLine("<td colspan=\"4\" style=\"text-align: right;\">BRANCH TOTAL</td>");
-                html.AppendLine($"<td class=\"amount-right\">{branchReport.TotalAmount:N2}</td>");
+                html.AppendLine($"<td colspan=\"2\" class=\"amount-right\">{branchReport.TotalAmount:N2}</td>");
                 html.AppendLine("</tr>");
 
                 html.AppendLine("</table>");
@@ -193,7 +194,7 @@ namespace SchoolPayListSystem.Reports
         }
 
         /// <summary>
-        /// Generate Branch Detail Report HTML with optional Advice Number
+        /// Generate Branch Detail Report HTML with Advice Number at top
         /// </summary>
         public string GenerateBranchDetailReportHtml(
             BranchDetailReportDTO branchReport,
@@ -217,6 +218,7 @@ namespace SchoolPayListSystem.Reports
                 html.AppendLine("th { background-color: #f2f2f2; font-weight: bold; }");
                 html.AppendLine(".header { text-align: center; font-weight: bold; margin-bottom: 5px; }");
                 html.AppendLine(".subheader { text-align: center; font-size: 9pt; margin-bottom: 15px; }");
+                html.AppendLine(".advice-number { text-align: left; font-weight: bold; color: #9933CC; margin: 10px 0; font-size: 11pt; }");
                 html.AppendLine(".total-row { background-color: #e8e8e8; font-weight: bold; }");
                 html.AppendLine(".amount-right { text-align: right; }");
                 html.AppendLine(".footer { margin-top: 20px; font-size: 8pt; }");
@@ -230,32 +232,27 @@ namespace SchoolPayListSystem.Reports
                 html.AppendLine($"<div class=\"header\">TO BRANCH: {branchReport.BranchCode} {branchReport.BranchName}</div>");
                 html.AppendLine($"<div class=\"subheader\">");
                 
-                if (includeAdviceNumber && branchReport.Entries.Count > 0)
-                {
-                    html.AppendLine($"Advice No.: {branchReport.Entries[0].AdviceNumber} &nbsp;&nbsp;&nbsp;&nbsp; ");
-                }
-                
                 html.AppendLine($"Posting Date: {branchReport.EntryDate:dd/MM/yyyy} &nbsp;&nbsp;&nbsp;&nbsp; Page No. {pageNumber}");
                 html.AppendLine($"<br/>Please Note that your A/c has been CREDITED/DEBIT totay as below");
                 html.AppendLine("</div>");
 
-                // Table Header
+                // Display Advice Number at top
+                if (!string.IsNullOrEmpty(branchReport.Entries.FirstOrDefault()?.AdviceNumber))
+                {
+                    html.AppendLine($"<div class=\"advice-number\">Advice Number: {branchReport.Entries.First().AdviceNumber}</div>");
+                }
+
+                // Table Header (without ADVICE NO column)
                 html.AppendLine("<table>");
                 html.AppendLine("<tr>");
                 html.AppendLine("<th style=\"width: 8%;\">Sr. No.</th>");
                 html.AppendLine("<th style=\"width: 8%;\">SCH CODE</th>");
                 html.AppendLine("<th style=\"width: 15%;\">ACCOUNT NO.</th>");
-                html.AppendLine("<th style=\"width: 50%;\">SCHOOL/COLLEGE NAME</th>");
-                html.AppendLine("<th style=\"width: 19%;\" class=\"amount-right\">AMOUNT</th>");
-                
-                if (includeAdviceNumber)
-                {
-                    html.AppendLine("<th style=\"width: 15%;\">ADVICE NO.</th>");
-                }
-                
+                html.AppendLine("<th style=\"width: 53%;\">SCHOOL/COLLEGE NAME</th>");
+                html.AppendLine("<th style=\"width: 16%;\" class=\"amount-right\">AMOUNT</th>");
                 html.AppendLine("</tr>");
 
-                // Data Rows
+                // Data Rows (without ADVICE NO column)
                 foreach (var entry in branchReport.Entries)
                 {
                     html.AppendLine("<tr>");
@@ -264,25 +261,13 @@ namespace SchoolPayListSystem.Reports
                     html.AppendLine($"<td>{entry.AccountNumber}</td>");
                     html.AppendLine($"<td>{entry.SchoolName}</td>");
                     html.AppendLine($"<td class=\"amount-right\">{entry.Amount:N2}</td>");
-                    
-                    if (includeAdviceNumber)
-                    {
-                        html.AppendLine($"<td>{entry.AdviceNumber}</td>");
-                    }
-                    
                     html.AppendLine("</tr>");
                 }
 
                 // Total Row
                 html.AppendLine("<tr class=\"total-row\">");
-                html.AppendLine("<td colspan=\"" + (includeAdviceNumber ? "4" : "3") + "\" style=\"text-align: right;\">BRANCH TOTAL</td>");
+                html.AppendLine("<td colspan=\"4\" style=\"text-align: right;\">BRANCH TOTAL</td>");
                 html.AppendLine($"<td class=\"amount-right\">{branchReport.TotalAmount:N2}</td>");
-                
-                if (includeAdviceNumber)
-                {
-                    html.AppendLine("<td></td>");
-                }
-                
                 html.AppendLine("</tr>");
 
                 html.AppendLine("</table>");

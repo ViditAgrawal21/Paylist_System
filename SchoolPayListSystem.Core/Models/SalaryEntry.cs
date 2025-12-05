@@ -19,6 +19,7 @@ namespace SchoolPayListSystem.Core.Models
         public int CreatedByUserId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public bool IsImported { get; set; } = false; // false = fresh entry, true = imported from Excel
 
         public virtual School School { get; set; }
         public virtual Branch Branch { get; set; }

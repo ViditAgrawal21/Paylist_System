@@ -91,12 +91,14 @@ namespace SchoolPayListSystem.Data.Database
                             var reader = command.ExecuteReader();
                             bool hasEntryTime = false;
                             bool hasOperatorName = false;
+                            bool hasIsImported = false;
                             
                             while (reader.Read())
                             {
                                 string columnName = reader["name"].ToString();
                                 if (columnName == "EntryTime") hasEntryTime = true;
                                 if (columnName == "OperatorName") hasOperatorName = true;
+                                if (columnName == "IsImported") hasIsImported = true;
                             }
                             reader.Close();
 
@@ -110,6 +112,12 @@ namespace SchoolPayListSystem.Data.Database
                             if (!hasOperatorName)
                             {
                                 command.CommandText = "ALTER TABLE SalaryEntries ADD COLUMN OperatorName TEXT";
+                                command.ExecuteNonQuery();
+                            }
+
+                            if (!hasIsImported)
+                            {
+                                command.CommandText = "ALTER TABLE SalaryEntries ADD COLUMN IsImported INTEGER DEFAULT 0";
                                 command.ExecuteNonQuery();
                             }
                         }
@@ -138,7 +146,7 @@ namespace SchoolPayListSystem.Data.Database
                         context.SaveChanges();
                     }
 
-                    // Add hard-coded GCP admin user if no users exist
+                    // Add hard-coded GCP admin user and operator users if no users exist
                     if (!context.Users.Any())
                     {
                         // Hard-coded GCP admin credentials
@@ -157,6 +165,46 @@ namespace SchoolPayListSystem.Data.Database
                                 CreatedAt = DateTime.Now,
                                 IsActive = true,
                                 Role = "Admin"
+                            }
+                        );
+                        
+                        // Add operator users
+                        context.Users.AddRange(
+                            new User
+                            {
+                                Username = "SNC",
+                                FullName = "SANDIP CHAVHAN",
+                                PasswordHash = "", // No password needed for operators
+                                CreatedAt = DateTime.Now,
+                                IsActive = true,
+                                Role = "Operator"
+                            },
+                            new User
+                            {
+                                Username = "RRS",
+                                FullName = "RITESH SONONE",
+                                PasswordHash = "",
+                                CreatedAt = DateTime.Now,
+                                IsActive = true,
+                                Role = "Operator"
+                            },
+                            new User
+                            {
+                                Username = "RRS915",
+                                FullName = "RITESH",
+                                PasswordHash = "",
+                                CreatedAt = DateTime.Now,
+                                IsActive = true,
+                                Role = "Operator"
+                            },
+                            new User
+                            {
+                                Username = "rrs915",
+                                FullName = "ratesh",
+                                PasswordHash = "",
+                                CreatedAt = DateTime.Now,
+                                IsActive = true,
+                                Role = "Operator"
                             }
                         );
                         context.SaveChanges();

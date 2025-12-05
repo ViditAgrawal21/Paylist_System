@@ -1,0 +1,46 @@
+<Window x:Class="SchoolPayListSystem.App.ExportDataWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Import and View Data" Height="600" Width="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+    <Grid Margin="20">
+        <DockPanel VerticalAlignment="Stretch">
+            <!-- Header and Controls -->
+            <StackPanel DockPanel.Dock="Top" VerticalAlignment="Top">
+                <TextBlock Text="Data Management" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+                
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <Button Name="ImportButton" Content="Import Excel Data" Width="150" Padding="10" Click="ImportSalaryData_Click" Background="#9C27B0" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                    <Button Name="ExportButton" Content="Export to Excel" Width="150" Margin="10,0,0,0" Padding="10" Click="ExportButton_Click" Background="#2196F3" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                    <Button Name="ClearDatabaseButton" Content="Clear All Data" Width="150" Margin="10,0,0,0" Padding="10" Click="ClearDatabase_Click" Background="#F44336" Foreground="White" FontWeight="Bold" Cursor="Hand"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Entries Details Grid -->
+            <StackPanel DockPanel.Dock="Bottom">
+                <TextBlock Text="All Data Entries" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="450">
+                    <DataGrid Name="EntriesDataGrid" AutoGenerateColumns="False" IsReadOnly="True"
+                             GridLinesVisibility="All" RowBackground="White" AlternatingRowBackground="#F9F9F9">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Entry ID" Binding="{Binding SalaryEntryId}" Width="70"/>
+                            <DataGridTextColumn Header="Date" Binding="{Binding EntryDate, StringFormat='{}{0:dd/MM/yyyy}'}" Width="100"/>
+                            <DataGridTextColumn Header="School Code" Binding="{Binding School.SchoolCode}" Width="100"/>
+                            <DataGridTextColumn Header="School Name" Binding="{Binding School.SchoolName}" Width="150"/>
+                            <DataGridTextColumn Header="Branch" Binding="{Binding Branch.BranchName}" Width="100"/>
+                            <DataGridTextColumn Header="Account" Binding="{Binding AccountNumber}" Width="120"/>
+                            <DataGridTextColumn Header="Amount1" Binding="{Binding Amount1, StringFormat='{}{0:N2}'}" Width="100"/>
+                            <DataGridTextColumn Header="Amount2" Binding="{Binding Amount2, StringFormat='{}{0:N2}'}" Width="100"/>
+                            <DataGridTextColumn Header="Amount3" Binding="{Binding Amount3, StringFormat='{}{0:N2}'}" Width="100"/>
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat='{}{0:N2}'}" Width="100"/>
+                            <DataGridTextColumn Header="Advice#" Binding="{Binding AdviceNumber}" Width="100"/>
+                            <DataGridTextColumn Header="Operator" Binding="{Binding OperatorName}" Width="120"/>
+                            <DataGridTextColumn Header="Source" Binding="{Binding IsImported, StringFormat='{}{0:Imported|Fresh}'}" Width="70"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>

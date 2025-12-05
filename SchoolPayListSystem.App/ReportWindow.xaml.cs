@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using SchoolPayListSystem.Core.Models;
 using SchoolPayListSystem.Core.DTOs;
 using SchoolPayListSystem.Data.Database;
@@ -47,6 +48,12 @@ namespace SchoolPayListSystem.App
             Loaded += async (s, e) => await LoadFilterOptions();
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Initialize visibility after window is fully loaded
+            ReportType_Changed(null, null);
+        }
+
         private async System.Threading.Tasks.Task LoadFilterOptions()
         {
             try
@@ -54,7 +61,10 @@ namespace SchoolPayListSystem.App
                 if (ReportType == "SchoolTypeSummary")
                 {
                     FilterLabel.Text = "Select School Type";
-                    IncludeAdviceNumberCheckBox.Visibility = Visibility.Collapsed;
+                    FilterLabel2.Visibility = Visibility.Collapsed;
+                    FilterCombo2.Visibility = Visibility.Collapsed;
+                    AdviceNumberTogglePanel.Visibility = Visibility.Visible;
+                    
                     var schoolTypes = await _schoolTypeService.GetAllTypesAsync();
                     FilterCombo.ItemsSource = schoolTypes;
                     FilterCombo.DisplayMemberPath = "TypeName";
@@ -63,16 +73,36 @@ namespace SchoolPayListSystem.App
                 else if (ReportType == "BranchDetail")
                 {
                     FilterLabel.Text = "Select Branch";
-                    IncludeAdviceNumberCheckBox.Visibility = Visibility.Visible;
+                    FilterLabel2.Visibility = Visibility.Visible;
+                    FilterCombo2.Visibility = Visibility.Visible;
+                    AdviceNumberTogglePanel.Visibility = Visibility.Visible;
+                    
+                    // Load branches with "All Branches" option
                     var branches = await _branchService.GetAllBranchesAsync();
-                    FilterCombo.ItemsSource = branches;
+                    var allBranchesList = new List<Branch>
+                    {
+                        new Branch { BranchId = -1, BranchName = "All Branches" }
+                    };
+                    allBranchesList.AddRange(branches);
+                    
+                    FilterCombo.ItemsSource = allBranchesList;
                     FilterCombo.DisplayMemberPath = "BranchName";
                     FilterCombo.SelectedValuePath = "BranchId";
+                    FilterCombo.SelectedIndex = 0; // Select "All Branches" by default
+                    
+                    // Load school types in second combo
+                    var schoolTypes = await _schoolTypeService.GetAllTypesAsync();
+                    FilterCombo2.ItemsSource = schoolTypes;
+                    FilterCombo2.DisplayMemberPath = "TypeName";
+                    FilterCombo2.SelectedValuePath = "SchoolTypeId";
                 }
                 else if (ReportType == "SchoolTypeDetail")
                 {
                     FilterLabel.Text = "Select School Type";
-                    IncludeAdviceNumberCheckBox.Visibility = Visibility.Collapsed;
+                    FilterLabel2.Visibility = Visibility.Collapsed;
+                    FilterCombo2.Visibility = Visibility.Collapsed;
+                    AdviceNumberTogglePanel.Visibility = Visibility.Collapsed;
+                    
                     var schoolTypes = await _schoolTypeService.GetAllTypesAsync();
                     FilterCombo.ItemsSource = schoolTypes;
                     FilterCombo.DisplayMemberPath = "TypeName";
@@ -82,6 +112,55 @@ namespace SchoolPayListSystem.App
             catch (Exception ex)
             {
                 MessageBox.Show($"Error loading filter options: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void FilterCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                // School Type dropdown is always visible for BranchDetail reports
+                // No need to hide it when "All Branches" is selected
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"FilterCombo_SelectionChanged error: {ex.Message}");
+            }
+        }
+
+        private void ReportType_Changed(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Check if controls are initialized
+                if (ReportTypeDateRange == null || ReportTypeAllTime == null)
+                    return;
+
+                // Show/hide date pickers based on report type
+                bool isDateRange = ReportTypeDateRange.IsChecked == true;
+                bool isAllTime = ReportTypeAllTime.IsChecked == true;
+                
+                if (ReportDatePicker != null)
+                    ReportDatePicker.Visibility = !isDateRange && !isAllTime ? Visibility.Visible : Visibility.Collapsed;
+                
+                if (ReportDateLabel != null)
+                    ReportDateLabel.Visibility = !isDateRange && !isAllTime ? Visibility.Visible : Visibility.Collapsed;
+                
+                if (StartDatePicker != null)
+                    StartDatePicker.Visibility = isDateRange ? Visibility.Visible : Visibility.Collapsed;
+                
+                if (StartDateLabel != null)
+                    StartDateLabel.Visibility = isDateRange ? Visibility.Visible : Visibility.Collapsed;
+                
+                if (EndDatePicker != null)
+                    EndDatePicker.Visibility = isDateRange ? Visibility.Visible : Visibility.Collapsed;
+                
+                if (EndDateLabel != null)
+                    EndDateLabel.Visibility = isDateRange ? Visibility.Visible : Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ReportType_Changed error: {ex.Message}");
             }
         }
 
@@ -96,7 +175,6 @@ namespace SchoolPayListSystem.App
                     return;
                 }
 
-                var reportDate = ReportDatePicker.SelectedDate ?? DateTime.Now;
                 var filterId = FilterCombo.SelectedValue as int?;
 
                 if (!filterId.HasValue)
@@ -105,13 +183,48 @@ namespace SchoolPayListSystem.App
                     return;
                 }
 
+                // Determine report date based on report type
+                DateTime reportDate = DateTime.Now;
+                DateTime? startDate = null;
+                DateTime? endDate = null;
+
+                if (ReportTypeToday.IsChecked == true)
+                {
+                    reportDate = ReportDatePicker.SelectedDate ?? DateTime.Now;
+                }
+                else if (ReportTypeDateRange.IsChecked == true)
+                {
+                    startDate = StartDatePicker.SelectedDate;
+                    endDate = EndDatePicker.SelectedDate;
+                    
+                    if (!startDate.HasValue || !endDate.HasValue)
+                    {
+                        MessageBox.Show("Please select both start and end dates.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+                }
+                // For All-Time, no date filtering needed
+
                 if (ReportType == "SchoolTypeSummary")
                 {
-                    var report = await _reportService.GenerateSchoolTypeSummaryReportAsync(filterId.Value, loggedInUser.UserId, reportDate);
+                    List<BranchReportDTO> report = null;
+
+                    if (ReportTypeToday.IsChecked == true)
+                    {
+                        report = await _reportService.GenerateSchoolTypeSummaryReportAsync(filterId.Value, loggedInUser.UserId, reportDate);
+                    }
+                    else if (ReportTypeDateRange.IsChecked == true)
+                    {
+                        report = await _reportService.GenerateSchoolTypeSummaryReportByDateRangeAsync(filterId.Value, loggedInUser.UserId, startDate.Value, endDate.Value);
+                    }
+                    else if (ReportTypeAllTime.IsChecked == true)
+                    {
+                        report = await _reportService.GenerateSchoolTypeAllTimeReportAsync(filterId.Value, loggedInUser.UserId);
+                    }
                     
                     if (report == null || report.Count == 0)
                     {
-                        MessageBox.Show("No entries found for the selected school type and date.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("No entries found for the selected criteria.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
 
@@ -128,11 +241,52 @@ namespace SchoolPayListSystem.App
                 }
                 else if (ReportType == "BranchDetail")
                 {
-                    var report = await _reportService.GenerateBranchSpecificReportAsync(filterId.Value, loggedInUser.UserId, reportDate);
+                    var branchId = FilterCombo.SelectedValue as int?;
+                    var schoolTypeId = FilterCombo2.SelectedValue as int?;
+
+                    if (!branchId.HasValue)
+                    {
+                        MessageBox.Show("Please select a branch.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    // School Type is always required for Branch Detail reports
+                    if (!schoolTypeId.HasValue)
+                    {
+                        MessageBox.Show("Please select both branch and school type.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        return;
+                    }
+
+                    BranchDetailReportDTO report = null;
+
+                    // If branchId is -1, it means "All Branches"
+                    if (branchId.Value == -1)
+                    {
+                        // Generate report for all branches with the selected school type
+                        var allBranches = await _branchService.GetAllBranchesAsync();
+                        // Generate report for first branch with the selected school type
+                        if (allBranches.Count > 0)
+                        {
+                            report = await _reportService.GenerateBranchWithSchoolTypeReportAsync(
+                                allBranches[0].BranchId,
+                                schoolTypeId.Value,  // Now always required
+                                loggedInUser.UserId,
+                                reportDate);
+                        }
+                    }
+                    else
+                    {
+                        // Call method that generates report with branch + school type filter
+                        report = await _reportService.GenerateBranchWithSchoolTypeReportAsync(
+                            branchId.Value, 
+                            schoolTypeId.Value, 
+                            loggedInUser.UserId, 
+                            reportDate);
+                    }
                     
                     if (report == null || report.Entries.Count == 0)
                     {
-                        MessageBox.Show("No entries found for the selected branch and date.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("No entries found for the selected branch, school type and date.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
                         return;
                     }
 
@@ -174,81 +328,88 @@ namespace SchoolPayListSystem.App
 
         private void DisplaySchoolTypeSummaryReport(List<BranchReportDTO> report, User loggedInUser, DateTime reportDate)
         {
-            var reportData = new ObservableCollection<dynamic>();
-
             var totalAmount = 0m;
+            int totalEntries = 0;
+            
             foreach (var branch in report)
             {
-                foreach (var entry in branch.Entries)
-                {
-                    dynamic row = new System.Dynamic.ExpandoObject();
-                    row.BranchCode = branch.BranchCode;
-                    row.BranchName = branch.BranchName;
-                    row.Amount = entry.TotalAmount;
-                    row.AdviceNumber = entry.AdviceNumber;
-                    reportData.Add(row);
-                    totalAmount += entry.TotalAmount;
-                }
+                totalEntries += branch.Entries.Count;
+                totalAmount += branch.Entries.Sum(e => e.AMOUNT);
             }
 
-            ReportDataGrid.ItemsSource = reportData;
-            TotalRecordsText.Text = reportData.Count.ToString();
+            // Show status message
+            string status = $"School Type Summary Report Generated\n\n" +
+                          $"Total Entries: {totalEntries}\n" +
+                          $"Total Amount: ₹{totalAmount:F2}\n\n" +
+                          $"Click 'Print' to print or 'Export PDF/HTML' to save the report.";
+            
+            ReportStatusText.Text = status;
+
+            TotalRecordsText.Text = totalEntries.ToString();
             TotalAmountText.Text = $"₹{totalAmount:F2}";
         }
 
         private void DisplayBranchDetailReport(BranchDetailReportDTO report, User loggedInUser)
         {
-            var reportData = new ObservableCollection<dynamic>();
+            int totalEntries = report.Entries.Count;
+            decimal totalAmount = report.TotalAmount;
 
-            foreach (var entry in report.Entries)
-            {
-                dynamic row = new System.Dynamic.ExpandoObject();
-                row.SerialNo = entry.SerialNumber;
-                row.SchoolCode = entry.SchoolCode;
-                row.AccountNo = entry.AccountNumber;
-                row.SchoolName = entry.SchoolName;
-                row.Amount = entry.Amount;
-                row.AdviceNumber = entry.AdviceNumber;
-                reportData.Add(row);
-            }
+            // Show status message
+            string status = $"Branch Detail Report Generated\n\n" +
+                          $"Branch: {report.BranchName}\n" +
+                          $"Total Entries: {totalEntries}\n" +
+                          $"Total Amount: ₹{totalAmount:F2}\n\n" +
+                          $"Click 'Print' to print or 'Export PDF/HTML' to save the report.";
+            
+            ReportStatusText.Text = status;
+            
+            // Hide the top-level advice number display
+            AdviceNumberDisplay.Visibility = Visibility.Collapsed;
 
-            ReportDataGrid.ItemsSource = reportData;
-            TotalRecordsText.Text = reportData.Count.ToString();
-            TotalAmountText.Text = $"₹{report.TotalAmount:F2}";
+            TotalRecordsText.Text = totalEntries.ToString();
+            TotalAmountText.Text = $"₹{totalAmount:F2}";
         }
 
         private void DisplaySchoolTypeDetailReport(List<SchoolTypeDetailReportDTO> report)
         {
-            var reportData = new ObservableCollection<dynamic>();
+            int totalEntries = report.Count;
             decimal totalAmount1 = 0m, totalAmount2 = 0m, totalAmount3 = 0m;
 
             foreach (var entry in report)
             {
-                dynamic row = new System.Dynamic.ExpandoObject();
-                row.SerialNo = entry.SerialNumber;
-                row.SchoolCode = entry.SchoolCode;
-                row.SchoolName = entry.SchoolName;
-                row.Amount1 = entry.Amount1;
-                row.Amount2 = entry.Amount2;
-                row.Amount3 = entry.Amount3;
-                row.Total = entry.TotalAmount;
-                reportData.Add(row);
-
                 totalAmount1 += entry.Amount1;
                 totalAmount2 += entry.Amount2;
                 totalAmount3 += entry.Amount3;
             }
 
-            ReportDataGrid.ItemsSource = reportData;
-            TotalRecordsText.Text = reportData.Count.ToString();
-            TotalAmountText.Text = $"₹{(totalAmount1 + totalAmount2 + totalAmount3):F2}";
+            decimal totalAmount = totalAmount1 + totalAmount2 + totalAmount3;
+
+            // Show status message
+            string status = $"School Type Detail Report Generated\n\n" +
+                          $"Total Entries: {totalEntries}\n" +
+                          $"Amount 1 Total: ₹{totalAmount1:F2}\n" +
+                          $"Amount 2 Total: ₹{totalAmount2:F2}\n" +
+                          $"Amount 3 Total: ₹{totalAmount3:F2}\n" +
+                          $"Grand Total: ₹{totalAmount:F2}\n\n" +
+                          $"Click 'Print' to print or 'Export PDF/HTML' to save the report.";
+            
+            ReportStatusText.Text = status;
+
+            // Hide advice number display for this report type
+            AdviceNumberDisplay.Visibility = Visibility.Collapsed;
+
+            TotalRecordsText.Text = totalEntries.ToString();
+            TotalAmountText.Text = $"₹{totalAmount:F2}";
         }
 
         private void Print_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                if (ReportDataGrid.Items.Count == 0)
+                // Check if any report data is loaded
+                if ((_currentSchoolTypeSummaryReport == null || _currentSchoolTypeSummaryReport.Count == 0) &&
+                    (_currentBranchDetailReport == null || _currentBranchDetailReport.Entries.Count == 0) &&
+                    (_currentSchoolTypeDetailReport == null || _currentSchoolTypeDetailReport.Count == 0))
                 {
                     MessageBox.Show("No data to print. Please generate a report first.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -257,7 +418,12 @@ namespace SchoolPayListSystem.App
                 PrintDialog printDialog = new PrintDialog();
                 if (printDialog.ShowDialog() == true)
                 {
-                    printDialog.PrintVisual(ReportDataGrid, "Report Print");
+                    // Create a simple text to print
+                    FlowDocument doc = new FlowDocument();
+                    doc.Blocks.Add(new Paragraph(new Run(ReportStatusText.Text)));
+                    
+                    IDocumentPaginatorSource idocument = doc;
+                    printDialog.PrintDocument(idocument.DocumentPaginator, "Report Print");
                     MessageBox.Show("Print job sent successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -271,7 +437,10 @@ namespace SchoolPayListSystem.App
         {
             try
             {
-                if (ReportDataGrid.Items.Count == 0)
+                // Check if any report data is loaded
+                if ((_currentSchoolTypeSummaryReport == null || _currentSchoolTypeSummaryReport.Count == 0) &&
+                    (_currentBranchDetailReport == null || _currentBranchDetailReport.Entries.Count == 0) &&
+                    (_currentSchoolTypeDetailReport == null || _currentSchoolTypeDetailReport.Count == 0))
                 {
                     MessageBox.Show("No data to export. Please generate a report first.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -298,11 +467,10 @@ namespace SchoolPayListSystem.App
                     }
                     else if (ReportType == "BranchDetail" && _currentBranchDetailReport != null)
                     {
-                        bool includeAdviceNumber = IncludeAdviceNumberCheckBox.IsChecked ?? true;
                         htmlContent = _pdfGenerator.GenerateBranchDetailReportHtml(
                             _currentBranchDetailReport,
                             _currentLoggedInUser.FullName,
-                            includeAdviceNumber,
+                            false,
                             1);
                     }
                     else if (ReportType == "SchoolTypeDetail" && _currentSchoolTypeDetailReport != null)
@@ -329,116 +497,6 @@ namespace SchoolPayListSystem.App
             {
                 MessageBox.Show($"Error exporting report: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private string GenerateHtmlReport()
-        {
-            var reportType = ReportType;
-            var reportDate = ReportDatePicker.SelectedDate?.ToString("dd/MM/yyyy") ?? "N/A";
-            
-            var html = new StringBuilder();
-            html.Append("<!DOCTYPE html><html><head><meta charset='UTF-8'><style>");
-            html.Append("body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }");
-            html.Append("h1 { color: #333; text-align: center; }");
-            html.Append("table { border-collapse: collapse; width: 100%; margin-top: 20px; background-color: white; }");
-            html.Append("th, td { border: 1px solid #ddd; padding: 10px; text-align: right; }");
-            html.Append("td:first-child { text-align: left; }");
-            html.Append("th { background-color: #9933CC; color: white; font-weight: bold; }");
-            html.Append("tr:nth-child(even) { background-color: #f9f9f9; }");
-            html.Append(".summary { margin-top: 20px; font-weight: bold; background-color: #e8f4f8; padding: 15px; border-left: 4px solid #9933CC; }");
-            html.Append(".summary-row { display: flex; justify-content: space-between; margin: 5px 0; }");
-            html.Append(".final-total { background-color: #fff3cd; padding: 15px; margin-top: 20px; font-size: 18px; border: 2px solid #9933CC; }");
-            html.Append("</style></head><body>");
-
-            html.Append($"<h1>Pay List Report - {reportType}</h1>");
-            html.Append($"<p>Report Date: <strong>{reportDate}</strong></p>");
-
-            html.Append("<table>");
-            
-            if (ReportType == "SchoolTypeSummary")
-            {
-                html.Append("<tr><th style='text-align: left;'>Branch Code</th><th>Branch Name</th><th>Amount</th><th>Advice Number</th></tr>");
-            }
-            else
-            {
-                html.Append("<tr><th>Sr.No</th><th style='text-align: left;'>School Code</th><th style='text-align: left;'>Account No</th><th style='text-align: left;'>School Name</th><th>Amount</th><th>Advice Number</th></tr>");
-            }
-
-            var totalAmount = 0m;
-
-            try
-            {
-                foreach (var item in ReportDataGrid.Items)
-                {
-                    try
-                    {
-                        dynamic row = item;
-                        
-                        if (ReportType == "SchoolTypeSummary")
-                        {
-                            decimal amount = Convert.ToDecimal(row.Amount ?? 0);
-                            totalAmount += amount;
-                            
-                            html.Append("<tr>");
-                            html.Append($"<td>{row.BranchCode}</td>");
-                            html.Append($"<td>{row.BranchName}</td>");
-                            html.Append($"<td>₹{amount:F2}</td>");
-                            html.Append($"<td>{row.AdviceNumber}</td>");
-                            html.Append("</tr>");
-                        }
-                        else
-                        {
-                            decimal amount = Convert.ToDecimal(row.Amount ?? 0);
-                            totalAmount += amount;
-                            
-                            html.Append("<tr>");
-                            html.Append($"<td>{row.SerialNo}</td>");
-                            html.Append($"<td>{row.SchoolCode}</td>");
-                            html.Append($"<td>{row.AccountNo}</td>");
-                            html.Append($"<td>{row.SchoolName}</td>");
-                            html.Append($"<td>₹{amount:F2}</td>");
-                            html.Append($"<td>{row.AdviceNumber}</td>");
-                            html.Append("</tr>");
-                        }
-                    }
-                    catch (Exception rowEx)
-                    {
-                        MessageBox.Show($"Error processing row: {rowEx.Message}", "Row Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error processing report data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            // Add totals row
-            html.Append("<tr style='background-color: #e8f4f8; font-weight: bold;'>");
-            if (ReportType == "SchoolTypeSummary")
-            {
-                html.Append("<td>TOTAL</td>");
-                html.Append("<td></td>");
-                html.Append($"<td>₹{totalAmount:F2}</td>");
-                html.Append("<td></td>");
-            }
-            else
-            {
-                html.Append("<td colspan='4'>BRANCH TOTAL</td>");
-                html.Append($"<td>₹{totalAmount:F2}</td>");
-                html.Append("<td></td>");
-            }
-            html.Append("</tr>");
-            html.Append("</table>");
-
-            html.Append("<div class='summary'>");
-            html.Append($"<p style='font-size: 16px; margin-bottom: 10px;'>Total Records: {ReportDataGrid.Items.Count}</p>");
-            html.Append($"<div class='summary-row'><span>Total Amount:</span><strong>₹{totalAmount:F2}</strong></div>");
-            html.Append("</div>");
-
-            html.Append($"<div class='final-total'>Generated on: {DateTime.Now:dd/MM/yyyy HH:mm:ss}</div>");
-            html.Append("</body></html>");
-
-            return html.ToString();
         }
     }
 }

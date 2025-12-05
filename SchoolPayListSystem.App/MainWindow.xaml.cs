@@ -1,4 +1,7 @@
 using System.Windows;
+using SchoolPayListSystem.Services;
+using SchoolPayListSystem.Data.Database;
+using SchoolPayListSystem.Data.Repositories;
 
 namespace SchoolPayListSystem.App
 {
@@ -7,6 +10,13 @@ namespace SchoolPayListSystem.App
         public MainWindow()
         {
             InitializeComponent();
+            
+            // Show Export Data section if user is Admin (GCP)
+            var loggedInUser = ((App)Application.Current).LoggedInUser;
+            if (loggedInUser != null && (loggedInUser.Role == "Admin" || loggedInUser.Username == "GCP"))
+            {
+                ExportDataSection.Visibility = Visibility.Visible;
+            }
         }
 
         private void AddBranch_Click(object sender, RoutedEventArgs e)
@@ -88,6 +98,12 @@ namespace SchoolPayListSystem.App
             LoginWindow loginWindow = new LoginWindow();
             loginWindow.Show();
             Close();
+        }
+
+        private void ExportData_Click(object sender, RoutedEventArgs e)
+        {
+            ExportDataWindow window = new ExportDataWindow();
+            window.ShowDialog();
         }
     }
 }

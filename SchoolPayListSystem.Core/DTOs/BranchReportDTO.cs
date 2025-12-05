@@ -5,14 +5,22 @@ namespace SchoolPayListSystem.Core.DTOs
 {
     public class SalaryEntryReportDTO
     {
-        public DateTime EntryDate { get; set; }
+        public DateTime INDATE { get; set; }
+        public string SchoolCode { get; set; }
         public string SchoolName { get; set; }
-        public string AccountNumber { get; set; }
-        public decimal Amount1 { get; set; }
-        public decimal Amount2 { get; set; }
-        public decimal Amount3 { get; set; }
-        public decimal TotalAmount { get; set; }
+        public string BankAccount { get; set; }
+        public string SchoolTypeCode { get; set; }
+        public string SchoolType { get; set; }
+        public int BranchCode { get; set; }
+        public string BranchName { get; set; }
+        public decimal AMOUNT { get; set; }
+        public decimal AMOUNT1 { get; set; }
+        public decimal AMOUNT2 { get; set; }
         public string AdviceNumber { get; set; }
+        public string OperatorName { get; set; }
+        public string OperatorId { get; set; }
+        public DateTime? STAMPDATE { get; set; }
+        public TimeSpan? STAMPTIME { get; set; }
     }
 
     public class BranchReportDTO
@@ -20,6 +28,7 @@ namespace SchoolPayListSystem.Core.DTOs
         public string BranchName { get; set; }
         public int BranchCode { get; set; }
         public decimal TotalAmount { get; set; }
+        public string AdviceNumber { get; set; }  // Starting advice number for this branch
         public List<SalaryEntryReportDTO> Entries { get; set; } = new();
     }
 }

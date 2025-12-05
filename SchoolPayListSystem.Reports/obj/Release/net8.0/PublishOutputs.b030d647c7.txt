@@ -1,5 +1,0 @@
-c:\Users\agraw\OneDrive\Desktop\SchoolPayListSystem_Release\SchoolPayListSystem.Reports.dll
-c:\Users\agraw\OneDrive\Desktop\SchoolPayListSystem_Release\SchoolPayListSystem.Reports.deps.json
-c:\Users\agraw\OneDrive\Desktop\SchoolPayListSystem_Release\SchoolPayListSystem.Reports.pdb
-c:\Users\agraw\OneDrive\Desktop\SchoolPayListSystem_Release\SchoolPayListSystem.Core.dll
-c:\Users\agraw\OneDrive\Desktop\SchoolPayListSystem_Release\SchoolPayListSystem.Core.pdb
