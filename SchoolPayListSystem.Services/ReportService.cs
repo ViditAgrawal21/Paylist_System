@@ -23,14 +23,15 @@ namespace SchoolPayListSystem.Services
         /// <summary>
         /// Generate School Type Summary Report (All branches for a school type)
         /// Filtered by currently logged-in user
-        /// Displays advice numbers that were already assigned in branch reports
-        /// Advice numbers are unique per BRANCH, not per school type
+        /// Displays advice numbers from the global AdviceNumberMapping table
+        /// Automatically syncs with Branch Reports through the mapping table
         /// </summary>
         public async Task<List<BranchReportDTO>> GenerateSchoolTypeSummaryReportAsync(int schoolTypeId, int createdByUserId, DateTime reportDate)
         {
             try
             {
                 var report = new List<BranchReportDTO>();
+                var adviceNumberService = new AdviceNumberService(_context);
 
                 // Get all schools of this type
                 var schoolsOfType = _context.Schools
@@ -57,7 +58,7 @@ namespace SchoolPayListSystem.Services
                     }
                 }
 
-                // Build report DTOs - use advice numbers from database if they exist, otherwise use first entry's advice number
+                // Build report DTOs using global advice number mapping
                 // Sort by Branch Code in ascending order
                 var sortedBranchIds = groupedByBranch.Keys
                     .Select(branchId => new { BranchId = branchId, Branch = _context.Branches.FirstOrDefault(b => b.BranchId == branchId) })
@@ -73,16 +74,17 @@ namespace SchoolPayListSystem.Services
 
                     var branchEntries = groupedByBranch[branchId];
                     
-                    // Get the advice number from the first entry (should be consistent within branch for a day)
-                    // or get the minimum advice number for this branch (which represents the advice number for this branch report)
-                    var firstEntryAdviceNumber = branchEntries.FirstOrDefault()?.AdviceNumber ?? "";
+                    // Get advice number from mapping table for this (branch + schooltype) combo
+                    // This ensures sync with Branch Reports
+                    string adviceNumber = await adviceNumberService.GenerateAdviceNumberAsync(
+                        reportDate, branchId, schoolTypeId, "SchoolSummary");
                     
                     var branchReport = new BranchReportDTO
                     {
                         BranchName = branch.BranchName,
-                        BranchCode = branch.BranchCode,  // Use BranchCode (actual code), not BranchId
+                        BranchCode = branch.BranchCode,
                         TotalAmount = branchEntries.Sum(e => e.TotalAmount),
-                        AdviceNumber = firstEntryAdviceNumber,  // Use the advice number from database
+                        AdviceNumber = adviceNumber,  // Use mapped advice number
                         Entries = branchEntries.Select(e => 
                         {
                             var school = _context.Schools.FirstOrDefault(s => s.SchoolId == e.SchoolId);
@@ -91,10 +93,10 @@ namespace SchoolPayListSystem.Services
                                 INDATE = e.EntryDate,
                                 SchoolCode = school?.SchoolCode ?? "",
                                 SchoolName = school?.SchoolName ?? "",
-                                BankAccount = school?.BankAccountNumber ?? "",  // Fetch from School, not SalaryEntry
+                                BankAccount = school?.BankAccountNumber ?? "",
                                 SchoolTypeCode = school?.SchoolType?.TypeCode ?? "",
                                 SchoolType = school?.SchoolType?.TypeName ?? "",
-                                BranchCode = branch.BranchCode,  // Use BranchCode (actual code), not BranchId
+                                BranchCode = branch.BranchCode,
                                 BranchName = branch.BranchName,
                                 AMOUNT = e.TotalAmount,
                                 AMOUNT1 = e.Amount1,
@@ -256,6 +258,7 @@ namespace SchoolPayListSystem.Services
                     .ToList();
 
                 // Generate advice numbers for this (Branch + SchoolType) combination
+                // Uses global sequential numbering - automatically syncs with other reports
                 var adviceNumberService = new AdviceNumberService(_context);
                 
                 // Build report entries with advice numbers
@@ -263,15 +266,18 @@ namespace SchoolPayListSystem.Services
                 int serialNumber = 1;
                 bool hasNewAdviceNumbers = false;
 
+                // Get one advice number for this (branch + schooltype) combo - all entries will share it
+                string branchTypeAdviceNumber = await adviceNumberService.GenerateAdviceNumberAsync(
+                    reportDate, branchId, schoolTypeId, "BranchReport");
+
                 foreach (var entry in entries)
                 {
-                    // ONLY use existing advice number - NEVER regenerate
-                    string adviceNumber = entry.AdviceNumber ?? "";
+                    // Use the advice number for this (branch + schooltype) combo
+                    string adviceNumber = branchTypeAdviceNumber;
                     
-                    // If advice number is missing AND this is a fresh entry (not imported), generate only then
-                    if (string.IsNullOrEmpty(adviceNumber))
+                    // Update entry if it didn't have an advice number
+                    if (string.IsNullOrEmpty(entry.AdviceNumber))
                     {
-                        adviceNumber = adviceNumberService.GenerateAdviceNumber(reportDate, branchId, schoolTypeId);
                         entry.AdviceNumber = adviceNumber;
                         hasNewAdviceNumbers = true;
                     }
@@ -290,7 +296,7 @@ namespace SchoolPayListSystem.Services
                     reportEntries.Add(reportEntry);
                 }
 
-                // Save ONLY if new advice numbers were generated (not for existing ones)
+                // Save entries if new advice numbers were added
                 if (hasNewAdviceNumbers && entries.Any())
                 {
                     await _salaryEntryRepository.SaveChangesAsync();
@@ -530,6 +536,105 @@ namespace SchoolPayListSystem.Services
             catch (Exception ex)
             {
                 throw new Exception($"Error generating all-time report: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
+        /// Generate All Branches Report grouped by School Type
+        /// Shows each school type as a heading, then branches underneath with their entries
+        /// </summary>
+        public async Task<List<AllBranchesReportDTO>> GenerateAllBranchesReportAsync(int createdByUserId, DateTime reportDate)
+        {
+            try
+            {
+                var report = new List<AllBranchesReportDTO>();
+                var adviceNumberService = new AdviceNumberService(_context);
+
+                // Get all school types
+                var schoolTypes = _context.SchoolTypes.ToList();
+
+                foreach (var schoolType in schoolTypes)
+                {
+                    var schoolTypeReport = new AllBranchesReportDTO
+                    {
+                        SchoolTypeName = schoolType.TypeName,
+                        SchoolTypeCode = schoolType.TypeCode,
+                        ReportDate = reportDate
+                    };
+
+                    // Get all branches
+                    var allBranches = _context.Branches.OrderBy(b => b.BranchCode).ToList();
+
+                    foreach (var branch in allBranches)
+                    {
+                        // Get all schools for this branch and school type
+                        var schools = _context.Schools
+                            .Where(s => s.BranchId == branch.BranchId && s.SchoolTypeId == schoolType.SchoolTypeId)
+                            .ToList();
+
+                        // Get salary entries for these schools on the report date
+                        var branchEntries = new List<SalaryEntry>();
+                        foreach (var school in schools)
+                        {
+                            var entries = _context.SalaryEntries
+                                .Where(se => se.SchoolId == school.SchoolId
+                                    && se.CreatedByUserId == createdByUserId
+                                    && se.EntryDate.Date == reportDate.Date)
+                                .ToList();
+                            branchEntries.AddRange(entries);
+                        }
+
+                        // Only add branch section if there are entries
+                        if (branchEntries.Any())
+                        {
+                            // Get advice number for this (branch + schooltype) combo
+                            string adviceNumber = await adviceNumberService.GenerateAdviceNumberAsync(
+                                reportDate, branch.BranchId, schoolType.SchoolTypeId, "AllBranchesReport");
+
+                            var branchSection = new BranchSectionDTO
+                            {
+                                BranchId = branch.BranchId,
+                                BranchCode = branch.BranchCode,
+                                BranchName = branch.BranchName,
+                                AdviceNumber = adviceNumber,
+                                BranchTotal = branchEntries.Sum(e => e.TotalAmount),
+                                Entries = branchEntries.Select(e =>
+                                {
+                                    var school = _context.Schools.FirstOrDefault(s => s.SchoolId == e.SchoolId);
+                                    return new SalaryEntryReportDTO
+                                    {
+                                        INDATE = e.EntryDate,
+                                        SchoolCode = school?.SchoolCode ?? "",
+                                        SchoolName = school?.SchoolName ?? "",
+                                        BankAccount = school?.BankAccountNumber ?? "",
+                                        SchoolTypeCode = school?.SchoolType?.TypeCode ?? "",
+                                        SchoolType = school?.SchoolType?.TypeName ?? "",
+                                        BranchCode = branch.BranchCode,
+                                        BranchName = branch.BranchName,
+                                        AMOUNT = e.TotalAmount,
+                                        AdviceNumber = adviceNumber
+                                    };
+                                }).ToList()
+                            };
+
+                            schoolTypeReport.BranchSections.Add(branchSection);
+                            schoolTypeReport.SchoolTypeTotal += branchSection.BranchTotal;
+                            schoolTypeReport.TotalEntries += branchEntries.Count;
+                        }
+                    }
+
+                    // Only add school type section if it has branches with entries
+                    if (schoolTypeReport.BranchSections.Any())
+                    {
+                        report.Add(schoolTypeReport);
+                    }
+                }
+
+                return await Task.FromResult(report);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error generating all branches report: {ex.Message}", ex);
             }
         }
 

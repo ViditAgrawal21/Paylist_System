@@ -11,6 +11,7 @@ namespace SchoolPayListSystem.Data.Database
         public DbSet<SchoolType> SchoolTypes { get; set; }
         public DbSet<School> Schools { get; set; }
         public DbSet<SalaryEntry> SalaryEntries { get; set; }
+        public DbSet<AdviceNumberMapping> AdviceNumberMappings { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -34,6 +35,7 @@ namespace SchoolPayListSystem.Data.Database
             modelBuilder.Entity<SchoolType>().HasKey(st => st.SchoolTypeId);
             modelBuilder.Entity<School>().HasKey(s => s.SchoolId);
             modelBuilder.Entity<SalaryEntry>().HasKey(se => se.SalaryEntryId);
+            modelBuilder.Entity<AdviceNumberMapping>().HasKey(a => a.AdviceNumberMappingId);
 
             modelBuilder.Entity<School>()
                 .HasOne(s => s.SchoolType)
@@ -65,8 +67,23 @@ namespace SchoolPayListSystem.Data.Database
                 .HasForeignKey(se => se.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<AdviceNumberMapping>()
+                .HasOne(a => a.Branch)
+                .WithMany()
+                .HasForeignKey(a => a.BranchId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AdviceNumberMapping>()
+                .HasOne(a => a.SchoolType)
+                .WithMany()
+                .HasForeignKey(a => a.SchoolTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<Branch>().HasIndex(b => b.BranchCode).IsUnique();
             modelBuilder.Entity<School>().HasIndex(s => s.SchoolCode).IsUnique();
+            modelBuilder.Entity<AdviceNumberMapping>()
+                .HasIndex(a => new { a.AdviceDate, a.BranchId, a.SchoolTypeId })
+                .IsUnique();
         }
     }
 }

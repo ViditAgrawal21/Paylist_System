@@ -52,7 +52,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="School Code:" VerticalAlignment="Center" FontWeight="Bold"/>
-                        <TextBox x:Name="SchoolCodeTextBox" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35" TextChanged="SchoolCode_TextChanged"/>
+                        <TextBox x:Name="SchoolCodeTextBox" Grid.Column="1" Margin="15,0,0,0" Padding="10" Height="35" TextChanged="SchoolCode_TextChanged" KeyDown="SchoolCodeTextBox_KeyDown"/>
                     </Grid>
 
                     <Grid Height="40" Margin="0,0,0,10">
@@ -173,6 +173,7 @@
                             <DataGridTextColumn Header="Amt 1" Binding="{Binding AMOUNT1, StringFormat=N2}" Width="80" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Amt 2" Binding="{Binding AMOUNT2, StringFormat=N2}" Width="80" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Amt 3" Binding="{Binding AMOUNT3, StringFormat=N2}" Width="80" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Total Amount" Binding="{Binding AMOUNT, StringFormat=N2}" Width="100" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Operator" Binding="{Binding OperatorName}" Width="100" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Stamp Date" Binding="{Binding STAMPDATE, StringFormat=dd/MM/yyyy}" Width="90" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Stamp Time" Binding="{Binding STAMPTIME}" Width="80" IsReadOnly="True"/>

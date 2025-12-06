@@ -510,6 +510,39 @@ namespace SchoolPayListSystem.App
             }
         }
 
+        private void SchoolCodeTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            try
+            {
+                var suggestions = this.FindName("SchoolCodeSuggestions") as ListBox;
+                
+                if (suggestions?.Visibility == Visibility.Visible)
+                {
+                    if (e.Key == System.Windows.Input.Key.Down)
+                    {
+                        suggestions.Focus();
+                        suggestions.SelectedIndex = 0;
+                        e.Handled = true;
+                    }
+                }
+                else if (e.Key == System.Windows.Input.Key.Tab || e.Key == System.Windows.Input.Key.Return)
+                {
+                    // After school code is selected, move focus to Amount1 field
+                    var amount1TextBox = this.FindName("Amount1TextBox") as TextBox;
+                    if (amount1TextBox != null)
+                    {
+                        amount1TextBox.Focus();
+                        amount1TextBox.SelectAll();
+                        e.Handled = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void SchoolSuggestion_Selected(object sender, SelectionChangedEventArgs e)
         {
             try
@@ -522,6 +555,14 @@ namespace SchoolPayListSystem.App
                     schoolCodeTextBox.Text = school.SchoolCode;
                     PopulateSchoolDetails(school);
                     suggestions.Visibility = Visibility.Collapsed;
+                    
+                    // Auto-focus to Amount1 field after school selection
+                    var amount1TextBox = this.FindName("Amount1TextBox") as TextBox;
+                    if (amount1TextBox != null)
+                    {
+                        amount1TextBox.Focus();
+                        amount1TextBox.SelectAll();
+                    }
                 }
             }
             catch (Exception ex)

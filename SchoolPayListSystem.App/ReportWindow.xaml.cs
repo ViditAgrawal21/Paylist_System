@@ -28,6 +28,7 @@ namespace SchoolPayListSystem.App
         private List<BranchReportDTO> _currentSchoolTypeSummaryReport;
         private BranchDetailReportDTO _currentBranchDetailReport;
         private List<SchoolTypeDetailReportDTO> _currentSchoolTypeDetailReport;
+        private List<AllBranchesReportDTO> _currentAllBranchesReport;
         private User _currentLoggedInUser;
         private DateTime _currentReportDate;
         private string _currentSchoolTypeName;
@@ -250,51 +251,53 @@ namespace SchoolPayListSystem.App
                         return;
                     }
 
-                    // School Type is always required for Branch Detail reports
-                    if (!schoolTypeId.HasValue)
-                    {
-                        MessageBox.Show("Please select both branch and school type.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                        return;
-                    }
-
-                    BranchDetailReportDTO report = null;
-
-                    // If branchId is -1, it means "All Branches"
+                    // If branchId is -1, it means "All Branches" - generate all branches report
                     if (branchId.Value == -1)
                     {
-                        // Generate report for all branches with the selected school type
-                        var allBranches = await _branchService.GetAllBranchesAsync();
-                        // Generate report for first branch with the selected school type
-                        if (allBranches.Count > 0)
+                        var allBranchesReport = await _reportService.GenerateAllBranchesReportAsync(
+                            loggedInUser.UserId,
+                            reportDate);
+
+                        if (allBranchesReport == null || allBranchesReport.Count == 0 || !allBranchesReport.Any(r => r.BranchSections.Any()))
                         {
-                            report = await _reportService.GenerateBranchWithSchoolTypeReportAsync(
-                                allBranches[0].BranchId,
-                                schoolTypeId.Value,  // Now always required
-                                loggedInUser.UserId,
-                                reportDate);
+                            MessageBox.Show("No entries found for any branches on this date.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
+                            return;
                         }
+
+                        _currentAllBranchesReport = allBranchesReport;
+                        _currentLoggedInUser = loggedInUser;
+                        _currentReportDate = reportDate;
+
+                        DisplayAllBranchesReport(allBranchesReport);
                     }
                     else
                     {
+                        // School Type is always required for Branch Detail reports
+                        if (!schoolTypeId.HasValue)
+                        {
+                            MessageBox.Show("Please select both branch and school type.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+
                         // Call method that generates report with branch + school type filter
-                        report = await _reportService.GenerateBranchWithSchoolTypeReportAsync(
-                            branchId.Value, 
-                            schoolTypeId.Value, 
-                            loggedInUser.UserId, 
+                        BranchDetailReportDTO report = await _reportService.GenerateBranchWithSchoolTypeReportAsync(
+                            branchId.Value,
+                            schoolTypeId.Value,
+                            loggedInUser.UserId,
                             reportDate);
-                    }
-                    
-                    if (report == null || report.Entries.Count == 0)
-                    {
-                        MessageBox.Show("No entries found for the selected branch, school type and date.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
-                        return;
-                    }
 
-                    _currentBranchDetailReport = report;
-                    _currentLoggedInUser = loggedInUser;
-                    _currentReportDate = reportDate;
+                        if (report == null || report.Entries.Count == 0)
+                        {
+                            MessageBox.Show("No entries found for the selected branch, school type and date.", "No Data", MessageBoxButton.OK, MessageBoxImage.Information);
+                            return;
+                        }
 
-                    DisplayBranchDetailReport(report, loggedInUser);
+                        _currentBranchDetailReport = report;
+                        _currentLoggedInUser = loggedInUser;
+                        _currentReportDate = reportDate;
+
+                        DisplayBranchDetailReport(report, loggedInUser);
+                    }
                 }
                 else if (ReportType == "SchoolTypeDetail")
                 {
@@ -402,6 +405,33 @@ namespace SchoolPayListSystem.App
             TotalAmountText.Text = $"₹{totalAmount:F2}";
         }
 
+        private void DisplayAllBranchesReport(List<AllBranchesReportDTO> reports)
+        {
+            int totalEntries = 0;
+            decimal totalAmount = 0m;
+
+            foreach (var schoolTypeReport in reports)
+            {
+                totalEntries += schoolTypeReport.TotalEntries;
+                totalAmount += schoolTypeReport.SchoolTypeTotal;
+            }
+
+            // Show status message
+            string status = $"All Branches Report Generated\n\n" +
+                          $"School Types: {reports.Count}\n" +
+                          $"Total Entries: {totalEntries}\n" +
+                          $"Total Amount: ₹{totalAmount:F2}\n\n" +
+                          $"Click 'Print' to print or 'Export PDF/HTML' to save the report.";
+            
+            ReportStatusText.Text = status;
+
+            // Hide the top-level advice number display
+            AdviceNumberDisplay.Visibility = Visibility.Collapsed;
+
+            TotalRecordsText.Text = totalEntries.ToString();
+            TotalAmountText.Text = $"₹{totalAmount:F2}";
+        }
+
         private void Print_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -409,7 +439,8 @@ namespace SchoolPayListSystem.App
                 // Check if any report data is loaded
                 if ((_currentSchoolTypeSummaryReport == null || _currentSchoolTypeSummaryReport.Count == 0) &&
                     (_currentBranchDetailReport == null || _currentBranchDetailReport.Entries.Count == 0) &&
-                    (_currentSchoolTypeDetailReport == null || _currentSchoolTypeDetailReport.Count == 0))
+                    (_currentSchoolTypeDetailReport == null || _currentSchoolTypeDetailReport.Count == 0) &&
+                    (_currentAllBranchesReport == null || _currentAllBranchesReport.Count == 0))
                 {
                     MessageBox.Show("No data to print. Please generate a report first.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -440,7 +471,8 @@ namespace SchoolPayListSystem.App
                 // Check if any report data is loaded
                 if ((_currentSchoolTypeSummaryReport == null || _currentSchoolTypeSummaryReport.Count == 0) &&
                     (_currentBranchDetailReport == null || _currentBranchDetailReport.Entries.Count == 0) &&
-                    (_currentSchoolTypeDetailReport == null || _currentSchoolTypeDetailReport.Count == 0))
+                    (_currentSchoolTypeDetailReport == null || _currentSchoolTypeDetailReport.Count == 0) &&
+                    (_currentAllBranchesReport == null || _currentAllBranchesReport.Count == 0))
                 {
                     MessageBox.Show("No data to export. Please generate a report first.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -471,6 +503,14 @@ namespace SchoolPayListSystem.App
                             _currentBranchDetailReport,
                             _currentLoggedInUser.FullName,
                             false,
+                            1);
+                    }
+                    else if (ReportType == "BranchDetail" && _currentAllBranchesReport != null)
+                    {
+                        htmlContent = _pdfGenerator.GenerateAllBranchesReportHtml(
+                            _currentAllBranchesReport,
+                            _currentReportDate,
+                            _currentLoggedInUser.FullName,
                             1);
                     }
                     else if (ReportType == "SchoolTypeDetail" && _currentSchoolTypeDetailReport != null)
