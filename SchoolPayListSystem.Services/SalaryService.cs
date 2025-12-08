@@ -308,8 +308,9 @@ namespace SchoolPayListSystem.Services
         {
             try
             {
+                var todayDate = DateTime.Now.Date;
                 var entries = await _context.SalaryEntries
-                    .Where(se => se.CreatedByUserId == createdByUserId && !se.IsImported)
+                    .Where(se => se.CreatedByUserId == createdByUserId && !se.IsImported && se.EntryDate.Date == todayDate)
                     .Join(_context.Schools, se => se.SchoolId, s => s.SchoolId, (se, s) => new { se, s })
                     .Join(_context.Branches, x => x.se.BranchId, b => b.BranchId, (x, b) => new { x.se, x.s, b })
                     .Join(_context.SchoolTypes, x => x.s.SchoolTypeId, st => st.SchoolTypeId, (x, st) => new { x.se, x.s, x.b, st })

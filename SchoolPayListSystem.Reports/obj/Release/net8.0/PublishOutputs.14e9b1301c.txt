@@ -1,0 +1,5 @@
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\Release\SchoolPayListSystem.Reports.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\Release\SchoolPayListSystem.Reports.deps.json
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\Release\SchoolPayListSystem.Reports.pdb
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\Release\SchoolPayListSystem.Core.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\Release\SchoolPayListSystem.Core.pdb

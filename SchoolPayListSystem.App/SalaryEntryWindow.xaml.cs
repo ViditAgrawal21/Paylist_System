@@ -145,6 +145,40 @@ namespace SchoolPayListSystem.App
             }
         }
 
+        private async void EntryDatePicker_SelectedDateChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            try
+            {
+                var entryDatePicker = this.FindName("EntryDatePicker") as DatePicker;
+                if (entryDatePicker?.SelectedDate == null)
+                {
+                    return;
+                }
+
+                DateTime selectedDate = entryDatePicker.SelectedDate.Value.Date;
+                var app = (App)Application.Current;
+
+                // Load all fresh entries for the logged-in user
+                var freshEntries = await _salaryService.GetFreshEntriesForDisplayAsync(app.LoggedInUser?.UserId ?? 0);
+
+                // Filter entries for the selected date
+                var filteredEntries = freshEntries
+                    .Where(e => e.INDATE.Date == selectedDate)
+                    .ToList();
+
+                // Update the grid with filtered entries
+                _entries.Clear();
+                foreach (var entry in filteredEntries)
+                {
+                    _entries.Add(entry);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading entries for selected date: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void Amount_Changed(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             CalculateTotal();

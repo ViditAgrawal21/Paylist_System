@@ -1,11 +1,11 @@
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\bin\Debug\net8.0\SchoolPayListSystem.Core.deps.json
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\bin\Debug\net8.0\SchoolPayListSystem.Core.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\bin\Debug\net8.0\SchoolPayListSystem.Core.pdb
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\obj\Debug\net8.0\SchoolPayListSystem.Core.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\obj\Debug\net8.0\SchoolPayListSystem.Core.AssemblyInfoInputs.cache
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\obj\Debug\net8.0\SchoolPayListSystem.Core.AssemblyInfo.cs
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\obj\Debug\net8.0\SchoolPayListSystem.Core.csproj.CoreCompileInputs.cache
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\obj\Debug\net8.0\SchoolPayListSystem.Core.sourcelink.json
-C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\bin\Debug\net8.0\SchoolPayListSystem.Core.deps.json
-C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\bin\Debug\net8.0\SchoolPayListSystem.Core.dll
-C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\bin\Debug\net8.0\SchoolPayListSystem.Core.pdb
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\obj\Debug\net8.0\SchoolPayListSystem.Core.dll
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\obj\Debug\net8.0\refint\SchoolPayListSystem.Core.dll
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.Core\obj\Debug\net8.0\SchoolPayListSystem.Core.pdb

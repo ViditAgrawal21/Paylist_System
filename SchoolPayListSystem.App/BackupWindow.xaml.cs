@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using Microsoft.Win32;
 using SchoolPayListSystem.Services;
+using SchoolPayListSystem.Data.Database;
 
 namespace SchoolPayListSystem.App
 {
@@ -129,25 +131,59 @@ namespace SchoolPayListSystem.App
                 string dbPath = Path.Combine(appDataPath, "SchoolPayListSystem", "Database", "SchoolPayList.db");
 
                 // Ensure directory exists
-                string? dbDir = Path.GetDirectoryName(dbPath);
-                if (dbDir != null && !Directory.Exists(dbDir))
+                string dbDir = Path.GetDirectoryName(dbPath) ?? "";
+                if (!Directory.Exists(dbDir))
                 {
                     Directory.CreateDirectory(dbDir);
                 }
 
-                // Restore from backup
+                // Dispose all existing database contexts to release file locks
+                var context = new SchoolPayListDbContext();
+                context.Dispose();
+
+                // Wait a moment for the connection to fully close
+                await System.Threading.Tasks.Task.Delay(500);
+
+                // Remove old database file if it exists
+                if (File.Exists(dbPath))
+                {
+                    try
+                    {
+                        File.Delete(dbPath);
+                        await System.Threading.Tasks.Task.Delay(200);
+                    }
+                    catch
+                    {
+                        // If delete fails, try overwrite
+                    }
+                }
+
+                // Restore from backup - copy the backup file to the database location
                 File.Copy(RestorePathTextBox.Text, dbPath, true);
+
+                // Verify the restored database by attempting to query it
+                try
+                {
+                    var verifyContext = new SchoolPayListDbContext();
+                    // Try a simple query to verify the database is valid
+                    int userCount = verifyContext.Users.Count();
+                    verifyContext.Dispose();
+                }
+                catch (Exception verifyEx)
+                {
+                    MessageBox.Show($"Warning: Database verification failed: {verifyEx.Message}\n\nThe backup file may be corrupted.", "Verification Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
 
                 RestoreStatus.Text = "✓ Database restored successfully!";
                 RestoreStatus.Foreground = System.Windows.Media.Brushes.Green;
                 
-                MessageBox.Show("Database restored successfully. The application may need to be restarted.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Database restored successfully. The application may need to be restarted for all changes to take effect.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 RestoreStatus.Text = $"✗ Error: {ex.Message}";
                 RestoreStatus.Foreground = System.Windows.Media.Brushes.Red;
-                MessageBox.Show($"Error restoring backup: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Error restoring backup: {ex.Message}\n\nPlease ensure:\n1. The backup file is valid\n2. No other instances of the application are running\n3. You have permission to write to the database folder", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

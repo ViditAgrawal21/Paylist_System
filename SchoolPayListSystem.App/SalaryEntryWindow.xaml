@@ -43,7 +43,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="Date:" VerticalAlignment="Center" FontWeight="Bold"/>
-                        <DatePicker x:Name="EntryDatePicker" Grid.Column="1" Margin="15,0,0,0" Height="35"/>
+                        <DatePicker x:Name="EntryDatePicker" Grid.Column="1" Margin="15,0,0,0" Height="35" SelectedDateChanged="EntryDatePicker_SelectedDateChanged"/>
                     </Grid>
 
                     <Grid Height="40" Margin="15,15,15,10">

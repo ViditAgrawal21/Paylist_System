@@ -423,21 +423,24 @@ namespace SchoolPayListSystem.Reports
                 html.AppendLine("<meta charset=\"utf-8\" />");
                 html.AppendLine("<title>All Branches Report</title>");
                 html.AppendLine("<style>");
+                html.AppendLine("@page { margin: 0.5in; size: A4; }");
+                html.AppendLine("@media print { body { margin: 0; padding: 0; } }");
                 html.AppendLine("body { font-family: Arial, sans-serif; font-size: 11pt; margin: 10px; }");
                 html.AppendLine("table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }");
                 html.AppendLine("th, td { border: 1px solid #000; padding: 8px; text-align: left; }");
                 html.AppendLine("th { background-color: #f2f2f2; font-weight: bold; }");
                 html.AppendLine(".header { text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 14pt; }");
-                html.AppendLine(".schooltype-header { background-color: #d3d3d3; font-weight: bold; font-size: 12pt; padding: 10px; margin-top: 20px; margin-bottom: 10px; }");
-                html.AppendLine(".schooltype-heading { text-align: left; font-weight: bold; font-size: 11pt; margin-top: 15px; margin-bottom: 10px; }");
-                html.AppendLine(".branch-section { margin-bottom: 20px; border-left: 3px solid #666; padding-left: 10px; }");
-                html.AppendLine(".branch-heading { font-weight: bold; font-size: 11pt; background-color: #e8e8e8; padding: 8px; margin-bottom: 10px; }");
+                html.AppendLine(".schooltype-header { text-align: center; background-color: #d3d3d3; font-weight: bold; font-size: 14pt; padding: 15px; margin-top: 0px; margin-bottom: 30px; }");
+                html.AppendLine(".page-number { text-align: right; font-size: 9pt; margin-bottom: 10px; }");
+                html.AppendLine(".branch-section { margin-bottom: 20px; border-left: 3px solid #666; padding-left: 10px; page-break-inside: avoid; page-break-after: auto; }");
+                html.AppendLine(".branch-heading { font-weight: bold; font-size: 12pt; background-color: #e8e8e8; padding: 10px; margin-bottom: 10px; border-bottom: 2px solid #333; }");
                 html.AppendLine(".header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 10pt; }");
                 html.AppendLine(".posting-date { text-align: right; font-size: 10pt; }");
                 html.AppendLine(".total-row { background-color: #e8e8e8; font-weight: bold; }");
-                html.AppendLine(".schooltype-total { background-color: #cccccc; font-weight: bold; }");
+                html.AppendLine(".schooltype-total { background-color: #cccccc; font-weight: bold; padding: 10px; margin-top: 20px; margin-bottom: 30px; text-align: right; font-size: 12pt; page-break-after: always; }");
                 html.AppendLine(".amount-right { text-align: right; }");
-                html.AppendLine(".footer { margin-top: 30px; font-size: 9pt; }");
+                html.AppendLine(".footer { margin-top: 50px; font-size: 9pt; page-break-before: always; border-top: 1px solid #000; padding-top: 20px; }");
+                html.AppendLine(".section-divider { page-break-after: always; margin: 30px 0; }");
                 html.AppendLine("</style>");
                 html.AppendLine("</head>");
                 html.AppendLine("<body>");
@@ -445,17 +448,37 @@ namespace SchoolPayListSystem.Reports
                 // Header
                 html.AppendLine($"<div class=\"header\">{BankName}</div>");
                 html.AppendLine($"<div class=\"header\">ALL BRANCHES REPORT</div>");
-                html.AppendLine($"<div class=\"header-row\"><span></span><span class=\"posting-date\">Posting Date: {reportDate:dd/MM/yyyy} &nbsp;&nbsp;&nbsp;&nbsp; Page No. {pageNumber}</span></div>");
+                html.AppendLine($"<div class=\"header-row\"><span></span><span class=\"posting-date\">Posting Date: {reportDate:dd/MM/yyyy}</span></div>");
 
                 // Process each school type
+                bool isFirstSchoolType = true;
+                int pageNum = 1;
+                
                 foreach (var schoolTypeReport in reports)
                 {
-                    // School Type Heading
+                    // School Type Heading - Centered at Top on new page
+                    if (!isFirstSchoolType)
+                        html.AppendLine("<div class=\"section-divider\"></div>");
+                    
+                    html.AppendLine($"<div class=\"page-number\">Page No. {pageNum}</div>");
                     html.AppendLine($"<div class=\"schooltype-header\">{schoolTypeReport.SchoolTypeCode} - {schoolTypeReport.SchoolTypeName.ToUpper()}</div>");
+                    
+                    isFirstSchoolType = false;
+                    pageNum++;
 
                     // Process each branch within this school type
+                    int branchCount = 0;
                     foreach (var branchSection in schoolTypeReport.BranchSections)
                     {
+                        // Add page break before each branch (except first)
+                        if (branchCount > 0)
+                        {
+                            html.AppendLine("<div class=\"section-divider\"></div>");
+                            html.AppendLine($"<div class=\"page-number\">Page No. {pageNum}</div>");
+                            html.AppendLine($"<div class=\"schooltype-header\">{schoolTypeReport.SchoolTypeCode} - {schoolTypeReport.SchoolTypeName.ToUpper()}</div>");
+                            pageNum++;
+                        }
+
                         html.AppendLine("<div class=\"branch-section\">");
 
                         // Branch Heading with Advice Number
@@ -493,10 +516,12 @@ namespace SchoolPayListSystem.Reports
 
                         html.AppendLine("</table>");
                         html.AppendLine("</div>");
+                        
+                        branchCount++;
                     }
 
-                    // School Type Total
-                    html.AppendLine($"<div style=\"background-color: #cccccc; padding: 8px; font-weight: bold; margin-bottom: 30px;\">");
+                    // School Type Total (with page break after)
+                    html.AppendLine($"<div class=\"schooltype-total\">");
                     html.AppendLine($"School Type Total: ₹{schoolTypeReport.SchoolTypeTotal:N2}");
                     html.AppendLine($"</div>");
                 }
@@ -504,7 +529,7 @@ namespace SchoolPayListSystem.Reports
                 // Footer
                 html.AppendLine("<div class=\"footer\">");
                 html.AppendLine($"<p>Prepared By: {preparedBy}</p>");
-                html.AppendLine($"<p>Printed On : {DateTime.Now:dd/MM/yyyy}</p>");
+                html.AppendLine($"<p>Printed On : {DateTime.Now:dd/MM/yyyy HH:mm:ss}</p>");
                 html.AppendLine("<p style=\"margin-top: 50px; border-top: 1px solid #000; padding-top: 10px;\">");
                 html.AppendLine("<div style=\"float: left;\">Cashier/Clerk</div>");
                 html.AppendLine("<div style=\"float: right;\">Officer/Manager</div>");

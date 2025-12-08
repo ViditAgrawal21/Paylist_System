@@ -90,9 +90,12 @@ namespace SchoolPayListSystem.App
 
         private void Restore_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Restore functionality coming soon", "Restore");
+            BackupWindow window = new BackupWindow();
+            window.ShowDialog();
         }
 
+        // CleanDatabase_Click method removed - Clean Database button removed from UI
+        
         private void Logout_Click(object sender, RoutedEventArgs e)
         {
             LoginWindow loginWindow = new LoginWindow();

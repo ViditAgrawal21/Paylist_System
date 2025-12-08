@@ -87,6 +87,7 @@ C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPay
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\SchoolPayListSystem.App.csproj.AssemblyReference.cache
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\BackupWindow.baml
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\BranchWindow.baml
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\CleanDatabaseWindow.baml
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\Controls\PasswordBoxWithToggle.baml
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\ExportDataWindow.baml
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\ImportExcelWindow.baml
@@ -106,6 +107,7 @@ C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPay
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\Views\SchoolTypeView.baml
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\BackupWindow.g.cs
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\BranchWindow.g.cs
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\CleanDatabaseWindow.g.cs
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\Controls\PasswordBoxWithToggle.g.cs
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\CreateAdminWindow.g.cs
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\ExportDataWindow.g.cs
