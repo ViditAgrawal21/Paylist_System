@@ -34,19 +34,20 @@
                 <Border BorderBrush="#CCCCCC" BorderThickness="1" Margin="0,0,0,20">
                     <StackPanel Margin="20">
                         <TextBlock Text="Database Restore" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
-                        <TextBlock Text="Restore database from a previous backup file." Foreground="#666666" Margin="0,0,0,15"/>
+                        <TextBlock Text="Restore database from a backup file. This will overwrite the current database." Foreground="#666666" Margin="0,0,0,15"/>
                         
                         <Grid Height="35" Margin="0,0,0,10">
-                            <TextBlock Text="Restore File" Width="150" VerticalAlignment="Center" FontWeight="Bold"/>
+                            <TextBlock Text="Backup File" Width="150" VerticalAlignment="Center" FontWeight="Bold"/>
                             <TextBox x:Name="RestorePathTextBox" Margin="160,0,80,0" Padding="10" IsReadOnly="True" Background="#F5F5F5"/>
                             <Button Content="Browse" Width="70" Height="35" Background="#0066CC" Foreground="White" HorizontalAlignment="Right" Click="BrowseRestore_Click"/>
                         </Grid>
 
-                        <Button Content="Restore from Backup" Width="150" Height="40" Background="#FF6600" Foreground="White" Click="RestoreBackup_Click"/>
+                        <Button Content="Restore Database Now" Width="150" Height="40" Background="#FF9900" Foreground="White" Click="RestoreDatabase_Click"/>
                         
-                        <TextBlock x:Name="RestoreStatus" Text="" Margin="0,10,0,0" Foreground="#FF6600" FontWeight="Bold"/>
+                        <TextBlock x:Name="RestoreStatus" Text="" Margin="0,10,0,0" Foreground="#00AA00" FontWeight="Bold"/>
                     </StackPanel>
                 </Border>
+
             </StackPanel>
 
             <!-- Close Button -->

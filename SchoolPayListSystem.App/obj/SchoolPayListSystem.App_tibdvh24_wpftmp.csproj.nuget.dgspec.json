@@ -1,0 +1,394 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.App\\SchoolPayListSystem.App.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.App\\SchoolPayListSystem.App.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.App\\SchoolPayListSystem.App.csproj",
+        "projectName": "SchoolPayListSystem.App",
+        "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.App\\SchoolPayListSystem.App.csproj",
+        "packagesPath": "C:\\Users\\agraw\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.App\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\agraw\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0-windows"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0-windows7.0": {
+            "targetAlias": "net8.0-windows",
+            "projectReferences": {
+              "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj": {
+                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj"
+              },
+              "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj": {
+                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj"
+              },
+              "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Reports\\SchoolPayListSystem.Reports.csproj": {
+                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Reports\\SchoolPayListSystem.Reports.csproj"
+              },
+              "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Services\\SchoolPayListSystem.Services.csproj": {
+                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Services\\SchoolPayListSystem.Services.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0-windows7.0": {
+          "targetAlias": "net8.0-windows",
+          "dependencies": {
+            "EPPlus": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            },
+            "Microsoft.Win32.Registry": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WPF": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj",
+        "projectName": "SchoolPayListSystem.Core",
+        "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj",
+        "packagesPath": "C:\\Users\\agraw\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\agraw\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj",
+        "projectName": "SchoolPayListSystem.Data",
+        "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj",
+        "packagesPath": "C:\\Users\\agraw\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\agraw\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj": {
+                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.SqlServer": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[10.0.0, )"
+            },
+            "SQLitePCLRaw.bundle_e_sqlite3": {
+              "target": "Package",
+              "version": "[2.1.7, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Reports\\SchoolPayListSystem.Reports.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Reports\\SchoolPayListSystem.Reports.csproj",
+        "projectName": "SchoolPayListSystem.Reports",
+        "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Reports\\SchoolPayListSystem.Reports.csproj",
+        "packagesPath": "C:\\Users\\agraw\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Reports\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\agraw\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj": {
+                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Services\\SchoolPayListSystem.Services.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Services\\SchoolPayListSystem.Services.csproj",
+        "projectName": "SchoolPayListSystem.Services",
+        "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Services\\SchoolPayListSystem.Services.csproj",
+        "packagesPath": "C:\\Users\\agraw\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Services\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\agraw\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj": {
+                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Core\\SchoolPayListSystem.Core.csproj"
+              },
+              "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj": {
+                "projectPath": "C:\\Users\\agraw\\OneDrive\\Desktop\\KAAM 25\\new_app_vs\\SchoolPayListSystem\\SchoolPayListSystem.Data\\SchoolPayListSystem.Data.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "9.0.300"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "EPPlus": {
+              "target": "Package",
+              "version": "[7.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

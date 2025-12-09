@@ -114,6 +114,12 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "itext7": {
+              "target": "Package",
+              "version": "[7.2.5, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

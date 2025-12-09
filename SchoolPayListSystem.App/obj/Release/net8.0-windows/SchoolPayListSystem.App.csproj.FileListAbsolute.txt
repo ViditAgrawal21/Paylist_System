@@ -147,3 +147,16 @@ C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPay
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\SchoolPayListSystem.App.pdb
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\SchoolPayListSystem.App.genruntimeconfig.cache
 C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\obj\Release\net8.0-windows\ref\SchoolPayListSystem.App.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.barcodes.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.forms.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.io.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.kernel.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.layout.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.pdfa.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.sign.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.styledxmlparser.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.svg.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\itext.commons.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\Microsoft.DotNet.PlatformAbstractions.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\Newtonsoft.Json.dll
+C:\Users\agraw\OneDrive\Desktop\KAAM 25\new_app_vs\SchoolPayListSystem\SchoolPayListSystem.App\bin\Release\net8.0-windows\BouncyCastle.Crypto.dll

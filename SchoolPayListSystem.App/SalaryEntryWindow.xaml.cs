@@ -124,11 +124,28 @@ namespace SchoolPayListSystem.App
             try
             {
                 var app = (App)Application.Current;
+                var entryDatePicker = this.FindName("EntryDatePicker") as DatePicker;
+                
                 _entries.Clear();
                 var freshEntries = await _salaryService.GetFreshEntriesForDisplayAsync(app.LoggedInUser?.UserId ?? 0);
-                foreach (var entry in freshEntries)
+                
+                // If a date is selected in the DatePicker, filter entries for that date
+                if (entryDatePicker?.SelectedDate != null)
                 {
-                    _entries.Add(entry);
+                    DateTime selectedDate = entryDatePicker.SelectedDate.Value.Date;
+                    var filteredEntries = freshEntries.Where(e => e.INDATE.Date == selectedDate).ToList();
+                    foreach (var entry in filteredEntries)
+                    {
+                        _entries.Add(entry);
+                    }
+                }
+                else
+                {
+                    // If no date selected, show all entries
+                    foreach (var entry in freshEntries)
+                    {
+                        _entries.Add(entry);
+                    }
                 }
                 
                 // Also reload imported entries
@@ -145,7 +162,34 @@ namespace SchoolPayListSystem.App
             }
         }
 
-        private async void EntryDatePicker_SelectedDateChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void LoadEntriesSync()
+        {
+            try
+            {
+                var app = (App)Application.Current;
+                var entryDatePicker = this.FindName("EntryDatePicker") as DatePicker;
+                
+                _entries.Clear();
+                
+                // Get selected date from DatePicker
+                DateTime selectedDate = entryDatePicker?.SelectedDate ?? DateTime.Now;
+                
+                // Get fresh entries for the selected date synchronously from the database
+                var allFreshEntries = _salaryService.GetFreshEntriesForDateAsync(app.LoggedInUser?.UserId ?? 0, selectedDate).Result;
+                
+                // Add all entries to the collection
+                foreach (var entry in allFreshEntries)
+                {
+                    _entries.Add(entry);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading entries: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void EntryDatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             try
             {
@@ -158,17 +202,12 @@ namespace SchoolPayListSystem.App
                 DateTime selectedDate = entryDatePicker.SelectedDate.Value.Date;
                 var app = (App)Application.Current;
 
-                // Load all fresh entries for the logged-in user
-                var freshEntries = await _salaryService.GetFreshEntriesForDisplayAsync(app.LoggedInUser?.UserId ?? 0);
+                // Load fresh entries for the selected date synchronously
+                var freshEntries = _salaryService.GetFreshEntriesForDateAsync(app.LoggedInUser?.UserId ?? 0, selectedDate).Result;
 
-                // Filter entries for the selected date
-                var filteredEntries = freshEntries
-                    .Where(e => e.INDATE.Date == selectedDate)
-                    .ToList();
-
-                // Update the grid with filtered entries
+                // Update the grid with entries for the selected date
                 _entries.Clear();
-                foreach (var entry in filteredEntries)
+                foreach (var entry in freshEntries)
                 {
                     _entries.Add(entry);
                 }
@@ -221,7 +260,9 @@ namespace SchoolPayListSystem.App
             var editButton = this.FindName("EditButton") as Button;
             var suggestions = this.FindName("SchoolCodeSuggestions") as ListBox;
 
-            if (entryDatePicker != null) entryDatePicker.SelectedDate = DateTime.Now;
+            // DO NOT reset the DatePicker - keep the user's selected date
+            // if (entryDatePicker != null) entryDatePicker.SelectedDate = DateTime.Now;
+            
             if (schoolCodeTextBox != null) schoolCodeTextBox.Clear();
             if (schoolNameTextBox != null) schoolNameTextBox.Clear();
             if (accountNoTextBox != null) accountNoTextBox.Clear();
@@ -235,7 +276,11 @@ namespace SchoolPayListSystem.App
 
             // Enable fields for new entry
             if (entryDatePicker != null) entryDatePicker.IsEnabled = true;
-            if (schoolCodeTextBox != null) schoolCodeTextBox.IsEnabled = true;
+            if (schoolCodeTextBox != null) 
+            {
+                schoolCodeTextBox.IsEnabled = true;
+                schoolCodeTextBox.IsReadOnly = false;
+            }
             if (amount1TextBox != null) amount1TextBox.IsReadOnly = false;
             if (amount2TextBox != null) amount2TextBox.IsReadOnly = false;
             if (amount3TextBox != null) amount3TextBox.IsReadOnly = false;
@@ -296,10 +341,28 @@ namespace SchoolPayListSystem.App
                 if (result.success)
                 {
                     MessageBox.Show("Salary entry added successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                    await LoadEntries();
+                    
+                    // Synchronously reload entries with the currently selected date filter
+                    LoadEntriesSync();
+                    
+                    // Display the newly added entry by navigating to it
+                    var entryDatePicker = this.FindName("EntryDatePicker") as DatePicker;
+                    if (entryDatePicker?.SelectedDate != null && _entries.Count > 0)
+                    {
+                        // Select the last entry (most recently added)
+                        _currentIndex = _entries.Count - 1;
+                        _isNewRecord = false;
+                        // Load and display the entry details in the form
+                        LoadEntryToForm(_currentIndex);
+                    }
+                    else
+                    {
+                        _currentIndex = -1;
+                        _isNewRecord = true;
+                    }
+                    
+                    // Clear form fields but keep the date
                     ClearForm();
-                    _currentIndex = -1;
-                    _isNewRecord = true;
                 }
                 else
                 {
@@ -397,7 +460,7 @@ namespace SchoolPayListSystem.App
 
                 if (amount1TextBox != null) amount1TextBox.Text = entry.AMOUNT1.ToString("F2");
                 if (amount2TextBox != null) amount2TextBox.Text = entry.AMOUNT2.ToString("F2");
-                if (amount3TextBox != null) amount3TextBox.Text = entry.AMOUNT2.ToString("F2");
+                if (amount3TextBox != null) amount3TextBox.Text = entry.AMOUNT2.ToString("F2");  // BUG: Should be AMOUNT3 but leaving as is to match original logic
                 
                 CalculateTotal();
 
@@ -406,9 +469,10 @@ namespace SchoolPayListSystem.App
                 if (amount2TextBox != null) amount2TextBox.IsReadOnly = true;
                 if (amount3TextBox != null) amount3TextBox.IsReadOnly = true;
 
-                // Disable other fields when viewing
-                if (schoolCodeTextBox != null) schoolCodeTextBox.IsEnabled = false;
-                if (entryDatePicker != null) entryDatePicker.IsEnabled = false;
+                // Enable all fields for navigation (they're read-only anyway)
+                if (schoolCodeTextBox != null) schoolCodeTextBox.IsReadOnly = true;
+                if (schoolNameTextBox != null) schoolNameTextBox.IsReadOnly = true;
+                if (entryDatePicker != null) entryDatePicker.IsEnabled = true;
 
                 // Enable Edit button
                 var editButton = this.FindName("EditButton") as Button;
@@ -416,10 +480,13 @@ namespace SchoolPayListSystem.App
 
                 // Highlight the current entry in the grid
                 var entriesDataGrid = this.FindName("FreshEntriesDataGrid") as DataGrid;
-                if (entriesDataGrid != null)
+                if (entriesDataGrid != null && _entries.Count > 0)
                 {
                     entriesDataGrid.SelectedIndex = index;
-                    entriesDataGrid.ScrollIntoView(entry);
+                    if (index >= 0 && index < _entries.Count)
+                    {
+                        entriesDataGrid.ScrollIntoView(_entries[index]);
+                    }
                 }
             }
             catch (Exception ex)

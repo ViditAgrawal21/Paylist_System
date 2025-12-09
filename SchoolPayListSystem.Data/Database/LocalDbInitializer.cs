@@ -128,23 +128,7 @@ namespace SchoolPayListSystem.Data.Database
                         System.Diagnostics.Debug.WriteLine($"Warning: Could not add new columns to SalaryEntries table: {ex.Message}");
                     }
 
-                    if (!context.SchoolTypes.Any())
-                    {
-                        context.SchoolTypes.AddRange(
-                            new SchoolType { TypeCode = "PS", TypeName = "Primary School", IsDefault = true, CreatedAt = DateTime.Now },
-                            new SchoolType { TypeCode = "HS", TypeName = "High School", IsDefault = false, CreatedAt = DateTime.Now },
-                            new SchoolType { TypeCode = "JC", TypeName = "Junior College", IsDefault = false, CreatedAt = DateTime.Now }
-                        );
-                        context.SaveChanges();
-                    }
 
-                    if (!context.Branches.Any())
-                    {
-                        context.Branches.Add(
-                            new Branch { BranchCode = 1, BranchName = "Head Office", CreatedAt = DateTime.Now, UpdatedAt = DateTime.Now }
-                        );
-                        context.SaveChanges();
-                    }
 
                     // Add hard-coded GCP admin user and operator users if no users exist
                     if (!context.Users.Any())

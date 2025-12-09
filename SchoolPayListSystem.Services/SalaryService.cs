@@ -348,6 +348,52 @@ namespace SchoolPayListSystem.Services
         }
 
         /// <summary>
+        /// Get fresh (manually created) salary entries for a specific date with full details
+        /// </summary>
+        public async Task<List<FreshSalaryEntryDTO>> GetFreshEntriesForDateAsync(int createdByUserId, DateTime entryDate)
+        {
+            try
+            {
+                var selectedDate = entryDate.Date;
+                var entries = await _context.SalaryEntries
+                    .Where(se => se.CreatedByUserId == createdByUserId && !se.IsImported && se.EntryDate.Date == selectedDate)
+                    .Join(_context.Schools, se => se.SchoolId, s => s.SchoolId, (se, s) => new { se, s })
+                    .Join(_context.Branches, x => x.se.BranchId, b => b.BranchId, (x, b) => new { x.se, x.s, b })
+                    .Join(_context.SchoolTypes, x => x.s.SchoolTypeId, st => st.SchoolTypeId, (x, st) => new { x.se, x.s, x.b, st })
+                    .Join(_context.Users, x => x.se.CreatedByUserId, u => u.UserId, (x, u) => new { x.se, x.s, x.b, x.st, u })
+                    .OrderByDescending(x => x.se.EntryDate)
+                    .Select(x => new FreshSalaryEntryDTO
+                    {
+                        SalaryEntryId = x.se.SalaryEntryId,
+                        INDATE = x.se.EntryDate,
+                        SchoolCode = x.s.SchoolCode,
+                        SchoolName = x.s.SchoolName,
+                        BankAccount = x.se.AccountNumber,
+                        SchoolTypeCode = x.st.TypeCode,
+                        SchoolType = x.st.TypeName,
+                        BranchCode = x.b.BranchId,
+                        Branch = x.b.BranchName,
+                        AMOUNT = x.se.TotalAmount,
+                        AMOUNT1 = x.se.Amount1,
+                        AMOUNT2 = x.se.Amount2,
+                        AMOUNT3 = x.se.Amount3,
+                        OperatorName = x.u.FullName,
+                        OperatorId = x.u.Username,
+                        UserId = x.u.UserId,
+                        STAMPDATE = x.se.CreatedAt,
+                        STAMPTIME = x.se.CreatedAt.TimeOfDay
+                    })
+                    .ToListAsync();
+
+                return entries;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error retrieving fresh entries for date: {ex.Message}", ex);
+            }
+        }
+
+        /// <summary>
         /// Get imported salary entries as summary by date, school type, and branch
         /// </summary>
         public async Task<List<ImportedSalaryEntrySummaryDTO>> GetImportedEntriesSummaryAsync(int createdByUserId)

@@ -480,56 +480,65 @@ namespace SchoolPayListSystem.App
 
                 var saveDialog = new Microsoft.Win32.SaveFileDialog
                 {
-                    Filter = "HTML Files (*.html)|*.html",
-                    DefaultExt = ".html",
+                    Filter = "All Branches (*.pdf)|*.pdf|HTML Files (*.html)|*.html",
+                    DefaultExt = ".pdf",
                     FileName = $"PayReport_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}"
                 };
 
                 if (saveDialog.ShowDialog() == true)
                 {
-                    string htmlContent = "";
+                    try
+                    {
+                        byte[] pdfBytes = null;
 
-                    if (ReportType == "SchoolTypeSummary" && _currentSchoolTypeSummaryReport != null)
-                    {
-                        htmlContent = _pdfGenerator.GenerateSchoolTypeSummaryReportHtml(
-                            _currentSchoolTypeSummaryReport,
-                            _currentSchoolTypeName,
-                            _currentReportDate,
-                            _currentLoggedInUser.FullName);
-                    }
-                    else if (ReportType == "BranchDetail" && _currentBranchDetailReport != null)
-                    {
-                        htmlContent = _pdfGenerator.GenerateBranchDetailReportHtml(
-                            _currentBranchDetailReport,
-                            _currentLoggedInUser.FullName,
-                            false,
-                            1);
-                    }
-                    else if (ReportType == "BranchDetail" && _currentAllBranchesReport != null)
-                    {
-                        htmlContent = _pdfGenerator.GenerateAllBranchesReportHtml(
-                            _currentAllBranchesReport,
-                            _currentReportDate,
-                            _currentLoggedInUser.FullName,
-                            1);
-                    }
-                    else if (ReportType == "SchoolTypeDetail" && _currentSchoolTypeDetailReport != null)
-                    {
-                        htmlContent = _pdfGenerator.GenerateSchoolTypeDetailReportHtml(
-                            _currentSchoolTypeDetailReport,
-                            _currentSchoolTypeName,
-                            _currentReportDate,
-                            _currentLoggedInUser.FullName,
-                            1);
-                    }
+                        // Generate PDF based on report type
+                        if (ReportType == "SchoolTypeSummary" && _currentSchoolTypeSummaryReport != null)
+                        {
+                            pdfBytes = _pdfGenerator.GenerateSchoolTypeSummaryReportPdf(
+                                _currentSchoolTypeSummaryReport,
+                                _currentSchoolTypeName,
+                                _currentReportDate,
+                                _currentLoggedInUser.FullName);
+                        }
+                        else if (ReportType == "BranchDetail" && _currentBranchDetailReport != null)
+                        {
+                            pdfBytes = _pdfGenerator.GenerateBranchSpecificReportPdf(
+                                _currentBranchDetailReport,
+                                _currentLoggedInUser.FullName,
+                                1);
+                        }
+                        else if (ReportType == "BranchDetail" && _currentAllBranchesReport != null)
+                        {
+                            pdfBytes = _pdfGenerator.GenerateAllBranchesReportPdf(
+                                _currentAllBranchesReport,
+                                _currentReportDate,
+                                _currentLoggedInUser.FullName);
+                        }
+                        else if (ReportType == "SchoolTypeDetail" && _currentSchoolTypeDetailReport != null)
+                        {
+                            pdfBytes = _pdfGenerator.GenerateSchoolTypeDetailReportPdf(
+                                _currentSchoolTypeDetailReport,
+                                _currentSchoolTypeName,
+                                _currentReportDate,
+                                _currentLoggedInUser.FullName);
+                        }
 
-                    if (!string.IsNullOrEmpty(htmlContent))
+                        if (pdfBytes != null && pdfBytes.Length > 0)
+                        {
+                            File.WriteAllBytes(saveDialog.FileName, pdfBytes);
+                            MessageBox.Show($"Report exported successfully to:\n{saveDialog.FileName}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                            
+                            // Open the PDF file
+                            System.Diagnostics.Process.Start(saveDialog.FileName);
+                        }
+                        else
+                        {
+                            MessageBox.Show("No data to export. Please generate a report first.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                    }
+                    catch (Exception ex)
                     {
-                        File.WriteAllText(saveDialog.FileName, htmlContent, Encoding.UTF8);
-                        MessageBox.Show($"Report exported successfully to:\n{saveDialog.FileName}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                        
-                        // Open the file in default browser
-                        System.Diagnostics.Process.Start(saveDialog.FileName);
+                        MessageBox.Show($"Error exporting PDF: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }
             }
